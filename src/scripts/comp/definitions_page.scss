@@ -1,0 +1,21 @@
+& .definitionsPageView {
+  .dt-buttons {
+    display: none;
+  }
+
+  .buttonsCol {
+    white-space: nowrap;
+  }
+
+  .btn-group-action {
+    display: inline-block;
+  }
+
+  button {
+    margin: 0;
+  }
+
+  & > .row > div {
+    margin-bottom: 10px;
+  }
+}

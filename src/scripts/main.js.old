@@ -1,0 +1,185 @@
+// The main javascript file for app_factory.
+// IMPORTANT:
+// Any resources from this project should be referenced using SRC_PATH preprocessor var
+// Ex: let myImage = '/*@echo SRC_PATH*//img/sample.jpg';
+
+/* global $ Backbone cot_app BaseRouter LoadingPageView */
+
+$(function() {
+  const APP_TITLE = 'App Factory';
+
+  const app = new cot_app(APP_TITLE, {
+    hasContentTop: false,
+    hasContentBottom: false,
+    hasContentRight: false,
+    hasContentLeft: false,
+    searchcontext: 'INTRA'
+  });
+
+  app.setBreadcrumb([{ name: APP_TITLE, link: '#def' }], true);
+
+  app.render();
+
+  app.container = document.getElementById('app_factory_container');
+  app.mainViewContainer = app.container.appendChild(document.createElement('div'));
+
+  app.mainView = new LoadingPageView();
+  app.mainView.appendTo(app.mainViewContainer).render();
+
+  app.models = {};
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  const AppRouter = BaseRouter.extend({
+    defaultFragment: 'def',
+
+    routes: {
+      def: 'routeDefinitionsPage',
+
+      'def/:appId': 'routeDefinitionDetailsPage',
+
+      'def/:appId/:fieldIndex': 'routeDefinitionDetailFieldPage',
+
+      'def/:appId/:fieldIndex/:validationIndex': '',
+
+      'def/:appId/:fieldIndex/:ruleIndex': '',
+
+      app: '',
+
+      'app/:entityset': '',
+
+      'app/:entityset/:entityId': '',
+
+      '*default': 'routeDefault'
+    },
+
+    /* global DefinitionsDatatableCollection DefinitionsPageView */
+    routeDefinitionsPage() {
+      delete app.models.definitionDetails;
+
+      return Promise.resolve()
+        .then(() => {
+          const collection = new DefinitionsDatatableCollection();
+          const view = new DefinitionsPageView({ collection });
+
+          return app.mainView.swapWith(view);
+        })
+        .then(newMainView => {
+          app.mainView = newMainView;
+
+          app.setTitle(APP_TITLE);
+          app.setBreadcrumb([app.breadcrumbItems[0]], true);
+
+          if (this._showFocus) {
+            app.titleElement.focus();
+          } else {
+            this._showFocus = true;
+          }
+        });
+    },
+
+    /* global DefinitionsDatatableModel DefinitionDetailsPageView */
+    routeDefinitionDetailsPage(appId) {
+      return Promise.resolve()
+        .then(() => {
+          if (!app.models.definitionDetails) {
+            app.models.definitionDetails = new DefinitionsDatatableModel();
+          }
+
+          if (appId === 'new') {
+            if (!app.models.definitionDetails.isNew()) {
+              app.models.definitionDetails = new DefinitionsDatatableModel();
+            }
+          } else {
+            if (app.models.definitionDetails.get('id') !== appId) {
+              app.models.definitionDetails.set('id', appId);
+              return app.models.definitionDetails.fetch()
+                .catch(() => {
+                  throw 'FETCH FAILED';
+                });
+            }
+          }
+        })
+        .then(() => {
+          const view = new DefinitionDetailsPageView({ model: app.models.definitionDetails });
+          return app.mainView.swapWith(view);
+        })
+        .then(newMainView => {
+          app.mainView = newMainView;
+
+          app.setTitle('App Details');
+          app.setBreadcrumb([app.breadcrumbItems[0], { name: 'App Details' }], true);
+
+          if (this._showFocus) {
+            app.titleElement.focus();
+          } else {
+            this._showFocus = true;
+          }
+        })
+        .catch((error) => {
+          alert(`AN ERROR HAS OCCURED. ${error}`);
+
+          if (error === 'FETCH FAILED') {
+            this.navigate(this.defaultFragment, { trigger: true });
+          } else {
+            this.navigate(this.defaultFragment, { trigger: true });
+          }
+        });
+    },
+
+    routeDefinitionDetailFieldPage(appId) {
+      return Promise.resolve()
+        .then(() => {
+          if (!app.models.definitionDetails) {
+            app.models.definitionDetails = new DefinitionsDatatableModel();
+          }
+
+          if (appId === 'new') {
+            if (!app.models.definitionDetails.isNew()) {
+              app.models.definitionDetails = new DefinitionsDatatableModel();
+            }
+          } else {
+            if (app.models.definitionDetails.get('id') !== appId) {
+              return app.models.definitionDetails.fetch({ id: appId })
+                .catch(() => {
+                  throw 'FETCH FAILED';
+                });
+            }
+          }
+        })
+        .then(() => {
+          const view = new DefinitionDetailsPageView({ model: app.models.definitionDetails });
+          return app.mainView.swapWith(view);
+        })
+        .then(newMainView => {
+          app.mainView = newMainView;
+
+          app.setTitle('App Details');
+          app.setBreadcrumb([app.breadcrumbItems[0], { name: 'App Details' }], true);
+
+          if (this._showFocus) {
+            app.titleElement.focus();
+          } else {
+            this._showFocus = true;
+          }
+        })
+        .catch((error) => {
+          if (error === 'FETCH FAILED') {
+
+            // TODO SHOW ERROR MESSAGE BEFORE NAVIGATION
+            this.navigate(this.defaultFragment, { trigger: true });
+          }
+
+          // TODO SHOW ERROR MESSAGE BEFORE NAVIGATION
+          this.navigate(this.defaultFragment, { trigger: true });
+
+        });
+    }
+  });
+
+  new AppRouter();
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  Backbone.history.start();
+});

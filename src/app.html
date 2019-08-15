@@ -5,17 +5,22 @@ See examples below in the boilerplate code
 -->
 
 <!-- cot-app:head -->
-  <!--@exec startBuildTagWithCacheBuster('styles/main.css')-->
-    <!-- core:css -->
-    <!-- endinject -->
-    <!-- place your application stylesheet references here: -->
-    <link rel="stylesheet" type="text/css" href="<!-- @echo SRC_PATH -->/styles/main.css">
-  <!-- endbuild -->
-  <!--@exec startBuildTagWithCacheBuster('styles/core_print.css', 'media="print"')-->
-    <!-- core_print:css -->
-    <!-- endinject -->
-    <!-- place any application print-only stylesheet references here -->
-  <!-- endbuild -->
+<!--@exec startBuildTagWithCacheBuster('styles/main.css')-->
+<!-- core:css -->
+<!-- endinject -->
+<!-- place your application stylesheet references here: -->
+
+<!-- Datatable -->
+<link rel="stylesheet" href="/node_modules/datatables/src/lib/datatables.min.css">
+<link rel="stylesheet" href="/node_modules/datatables.net-buttons-bs/css/buttons.bootstrap.css">
+
+<link rel="stylesheet" href="<!-- @echo SRC_PATH -->/styles/main.css" />
+<!-- endbuild -->
+<!--@exec startBuildTagWithCacheBuster('styles/core_print.css', 'media="print"')-->
+<!-- core_print:css -->
+<!-- endinject -->
+<!-- place any application print-only stylesheet references here -->
+<!-- endbuild -->
 <!-- cot-app:head end-->
 
 <!-- cot-app:body -->
@@ -23,17 +28,59 @@ See examples below in the boilerplate code
 <!-- cot-app:body end-->
 
 <!-- cot-app:footer -->
-  <!--@exec startBuildTagWithCacheBuster('scripts/main.js')-->
-    <!-- core:js -->
-    <!-- endinject -->
-    <!-- place your application script references here: -->
-    <script type="text/javascript" src="<!-- @echo SRC_PATH -->/scripts/main.js"></script>
-  <!-- endbuild -->
-  <!--@if ENV!='prod'-->
-  <script type="text/javascript">
-    console.log('app_factory running on <!--@echo ENV--> environment');
-    console.log('app_factory qa release: <!--@echo QA_RELEASE-->');
-    console.log('app_factory build: <!--@echo BUILD_ID-->');
-  </script>
-  <!--@endif-->
+<!--@exec startBuildTagWithCacheBuster('scripts/main.js')-->
+<!-- core:js -->
+<!-- endinject -->
+<!-- place your application script references here: -->
+
+<!-- Datatable -->
+<script src="/node_modules/jszip/dist/jszip.js"></script>
+<script src="/node_modules/pdfmake/build/pdfmake.js"></script>
+<script src="/node_modules/pdfmake/build/vfs_fonts.js"></script>
+<script src="/node_modules/datatables/src/lib/datatables.min.js"></script>
+<script src="/node_modules/datatables.net-buttons/js/dataTables.buttons.js"></script>
+<script src="/node_modules/datatables.net-buttons/js/buttons.html5.js"></script>
+<script src="/node_modules/datatables.net-buttons/js/buttons.print.js"></script>
+<script src="/node_modules/datatables.net-buttons-bs/js/buttons.bootstrap.js"></script>
+
+<!-- Library Base -->
+<script src="<!-- @echo SRC_PATH -->/scripts/lib/base.js"></script>
+
+<!-- Library Components -->
+<script src="<!-- @echo SRC_PATH -->/scripts/lib/comp/nav.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/lib/comp/alert.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/lib/comp/form.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/lib/comp/dialog.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/lib/comp/datatable.js"></script>
+
+<!-- Page Models -->
+<script src="<!-- @echo SRC_PATH -->/scripts/models/rule_model.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/models/validation_model.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/models/field_model.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/models/app_model.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/models/form_model.js"></script>
+
+<!-- Page Views -->
+<script src="<!-- @echo SRC_PATH -->/scripts/views/loading_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/apps_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/appdetails_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/fields_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/fielddetails_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/validations_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/validationdetails_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/rules_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/ruledetails_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/notfound_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/table_page_view.js"></script>
+<script src="<!-- @echo SRC_PATH -->/scripts/views/form_page_view.js"></script>
+
+<script src="<!-- @echo SRC_PATH -->/scripts/main.js"></script>
+<!-- endbuild -->
+<!--@if ENV!='prod'-->
+<script type="text/javascript">
+  console.log("app_factory running on <!--@echo ENV--> environment");
+  console.log("app_factory qa release: <!--@echo QA_RELEASE-->");
+  console.log("app_factory build: <!--@echo BUILD_ID-->");
+</script>
+<!--@endif-->
 <!-- cot-app:footer end-->

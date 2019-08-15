@@ -4,6 +4,63 @@
 // Any resources from this project should be referenced using SRC_PATH preprocessor var
 // Ex: background-image: url(/* @echo SRC_PATH*//img/sample.jpg)
 
-#app_factory_container {
+@import "../scripts/lib/comp/dialog.scss";
+@import "../scripts/lib/comp/form.scss";
+@import "../scripts/lib/comp/datatable.scss";
+#maincontent {
+  #app_factory_container {
+    @extend %DialogViewRoot;
+    @extend %FormViewRoot;
+    @extend %DatatableViewRoot;
+    @extend %FilteredDatatableViewRoot;
 
+    div.appsPage {
+      [data-view="FilteredDatatableView"] {
+        div.dt-buttons {
+          display: none;
+        }
+
+        .descriptionCol {
+          max-width: 300px;
+        }
+
+        .buttonsCol {
+          white-space: nowrap;
+        }
+      }
+
+      div.row.row-buttons > div {
+        margin-bottom: 10px;
+
+        button {
+          margin: 0;
+        }
+
+        div.btn-group-action {
+          display: inline-block;
+        }
+      }
+    }
+
+    div.appDetailsPageView {
+      [data-view="DatatableView"],
+      [data-view="FilteredDatatableView"] {
+        .buttonsCol {
+          white-space: nowrap;
+        }
+
+        .type-Section {
+          background-color: #e9e9e9;
+          border-top: 1px solid #346488;
+          font-weight: bold;
+        }
+      }
+    }
+
+    .sideBar {
+      .col-sm-6 + .col-sm-6 {
+        padding-left: 0;
+      }
+    }
+  }
 }

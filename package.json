@@ -38,11 +38,17 @@
   },
   "dependencies": {
     "core": "git+https://github.com/CityofToronto/corejs.git#9.3.6",
-    "cotui": "git+https://github.com/CityofToronto/COT_UI.git#1.0.2"
+    "cotui": "git+https://github.com/CityofToronto/COT_UI.git#1.0.2",
+    "datatables": "github:CityofToronto/fepe_datatables",
+    "datatables.net-buttons": "^1.5.6",
+    "datatables.net-buttons-bs": "^1.5.6",
+    "jszip": "^3.2.2",
+    "pdfmake": "^0.1.58",
+    "prompt": "^1.0.0"
   },
   "coreConfig": {
     "isEmbedded": false,
-    "includeFormValidation": false,
+    "includeFormValidation": true,
     "includeEditableSelect": false,
     "includeIntlTelInput": false,
     "includeJQueryMaskedInput": false,
@@ -54,7 +60,7 @@
     "includeLogin": false,
     "includeRangePicker": false,
     "includeMoment": false,
-    "includeModeling": false,
+    "includeModeling": true,
     "includeWebtrends": false,
     "isInternetStandaloneApp": false,
     "includeDropzone": false,
