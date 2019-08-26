@@ -5,8 +5,8 @@
 // Ex: background-image: url(/* @echo SRC_PATH*//img/sample.jpg)
 
 @import "../scripts/lib/comp/dialog.scss";
-@import "../scripts/lib/comp/form.scss";
-@import "../scripts/lib/comp/datatable.scss";
+@import "../scripts/lib/form.scss";
+@import "../scripts/lib/datatable.scss";
 #maincontent {
   #app_factory_container {
     @extend %DialogViewRoot;
@@ -55,11 +55,39 @@
           font-weight: bold;
         }
       }
+
+      .sideBar {
+        .col-sm-6 + .col-sm-6 {
+          padding-left: 0;
+        }
+      }
     }
 
-    .sideBar {
-      .col-sm-6 + .col-sm-6 {
-        padding-left: 0;
+    .tablePageView {
+      [data-view="FilteredDatatableView"] {
+        div.dt-buttons {
+          display: none;
+        }
+
+        .descriptionCol {
+          max-width: 300px;
+        }
+
+        .buttonsCol {
+          white-space: nowrap;
+        }
+      }
+
+      div.row.row-buttons > div {
+        margin-bottom: 10px;
+
+        button {
+          margin: 0;
+        }
+
+        div.btn-group-action {
+          display: inline-block;
+        }
       }
     }
   }

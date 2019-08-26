@@ -81,7 +81,7 @@ const FormPageView = BaseView.extend({
     row.classList.add('row');
 
     col = row.appendChild(document.createElement('div'));
-    col.classList.add('col-sm-9');
+    col.classList.add('col-sm-12');
 
     this.formView = new this.FormView({ model: this.model });
     const renderPromise = this.formView

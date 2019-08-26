@@ -15,8 +15,6 @@ const AppModel = BaseModel.extend({
     };
   },
 
-  urlRoot: '/* @echo C3DATA_APPS_URL */',
-
   toConfig() {
     const json = this.toJSON();
 
@@ -150,6 +148,6 @@ const AppModel = BaseModel.extend({
 /* exported AppCollection */
 const AppCollection = BaseCollection.extend({
   model: AppModel,
-  url: AppModel.prototype.urlRoot,
+  url: '/* @echo C3DATA_APPS_URL */',
   webStorageKey: 'apps'
 });

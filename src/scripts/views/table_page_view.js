@@ -1,7 +1,7 @@
-/* global toQueryString BaseView DatatableView FilteredDatatableView */
+/* global _ toQueryString BaseView DatatableView FilteredDatatableView */
 
-/* exported TabelDatatableView */
-const TabelDatatableView = FilteredDatatableView.extend({
+/* exported TableDatatableView */
+const TableDatatableView = FilteredDatatableView.extend({
   buttons: DatatableView.withButtons.buttons,
   dom: DatatableView.withButtons.dom,
   doButtonsCopy: DatatableView.withButtons.methods.doButtonsCopy,
@@ -15,15 +15,18 @@ const TabelDatatableView = FilteredDatatableView.extend({
 
 /* exported TablePageView */
 const TablePageView = BaseView.extend({
-  events: {
+  className: 'tablePageView',
+
+  events: () => ({
     ['click .btn-new'](event) {
       event.preventDefault();
-      // Backbone.history.navigate(`apps/new?${toQueryString({ reset: true })}`, { trigger: true });
+      this.trigger('clickNew');
     },
 
     ['click .btn-edit'](event) {
       event.preventDefault();
-      // const id = event.target.getAttribute('data-id');
+      const id = event.target.getAttribute('data-id');
+      this.trigger('clickEdit', id);
       // Backbone.history.navigate(`apps/${id}?${toQueryString({ reset: true })}`, { trigger: true });
     },
 
@@ -56,7 +59,7 @@ const TablePageView = BaseView.extend({
       event.preventDefault();
       this.datatableView.doButtonsPrint();
     }
-  },
+  }),
 
   removeDatatableView() {
     if (this.datatableView) {
@@ -103,7 +106,7 @@ const TablePageView = BaseView.extend({
       </div>
     `;
 
-    this.datatableView = new this.TableDatatableView({ className: 'datatableView', collection: this.collection });
+    this.datatableView = new this.TableDatatableView({ collection: this.collection });
     const renderPromise = this.datatableView.appendTo(fragment).render();
 
     row = fragment.appendChild(document.createElement('div'));

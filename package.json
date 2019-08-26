@@ -66,5 +66,8 @@
     "includeDropzone": false,
     "includeModal": false,
     "includeTerms": false
+  },
+  "scripts": {
+    "Build": "gulp run"
   }
 }

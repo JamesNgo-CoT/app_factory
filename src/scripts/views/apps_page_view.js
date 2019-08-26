@@ -61,7 +61,7 @@ const AppsDatatableView = FilteredDatatableView.extend({
 const AppsPageView = BaseView.extend({
   className: 'appsPage',
 
-  events: {
+  events: () => ({
     ['click .btn-new'](event) {
       event.preventDefault();
       Backbone.history.navigate(`apps/new?${toQueryString({ reset: true })}`, { trigger: true });
@@ -102,7 +102,7 @@ const AppsPageView = BaseView.extend({
       event.preventDefault();
       this.datatableView.doButtonsPrint();
     }
-  },
+  }),
 
   removeDatatableView() {
     if (this.datatableView) {

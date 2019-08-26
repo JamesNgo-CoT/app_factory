@@ -31,5 +31,5 @@ const FormModel = BaseModel.extend({
 
 /* exported FormCollection */
 const FormCollection = BaseCollection.extend({
-  model: FormModel
+  // model: FormModel
 });

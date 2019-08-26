@@ -1,8 +1,10 @@
-/* global doAjax toQueryString Backbone BaseView FormView DatatableView FilteredDatatableView AppModel FieldCollection ValidationCollection RuleCollection  */
+/* global doAjax toQueryString Backbone BaseView FormView DatatableView  AppModel FieldCollection ValidationCollection RuleCollection  */
 
 ////////////////////////////////////////////////////////////////////////////////
 // RULES DATATABLE VIEW
 ////////////////////////////////////////////////////////////////////////////////
+
+
 
 const RulesDatatableView = DatatableView.extend({
   datatableDefinition() {
@@ -78,7 +80,7 @@ const ValidationsDatatableView = DatatableView.extend({
 // FIELDS DATATABLE VIEW
 ////////////////////////////////////////////////////////////////////////////////
 
-const FieldsDatatableView = FilteredDatatableView.extend({
+const FieldsDatatableView = DatatableView.extend({
   datatableDefinition() {
     return {
       createdRow: function(row, data) {

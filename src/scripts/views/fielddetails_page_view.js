@@ -460,7 +460,7 @@ const FieldDetailsFormView = FormView.extend({
 
     this.model.set('newOrder', String(newOrder));
     this.model.set('order', String(newOrder));
-    this.model.setSnapShotData();
+    this.model.setSnapShot();
 
     this.restoreFromSubmission();
 
@@ -512,7 +512,7 @@ const FieldDetailsPageView = BaseView.extend({
 
   initialize(options) {
     options.model.set('newOrder', options.model.id);
-    options.model.setSnapShotData();
+    options.model.setSnapShot();
 
     this.listenTo(options.model, `change:${options.model.idAttribute}`, () => {
       this.buttonsView.render();
