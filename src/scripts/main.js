@@ -3,7 +3,7 @@
 // Any resources from this project should be referenced using SRC_PATH preprocessor var
 // Ex: let myImage = '/*@echo SRC_PATH*//img/sample.jpg';
 
-/* global $ Backbone cot_app BaseRouter LoadingPageView */
+/* global $ Backbone doAjax cot_app BaseRouter LoadingPageView */
 
 $(function() {
   const APP_TITLE = 'App Modules';
@@ -37,11 +37,13 @@ $(function() {
       'apps/:id/row(/)': 'routeAppFormPageView__row',
       'apps/:id/field(/)': 'routeAppFormPageView__field',
 
-      'table(/)': 'routeNotFoundPageView',
-      'table/:name/:id(/)': 'routeDefault',
-
       'form(/)': 'routeNotFoundPageView',
-      'form/:name/:id(/)': 'routeDefault',
+      'form/:name(/)': 'routeNotFoundPageView',
+      'form/:name/:id(/)': 'routeFormPageView',
+
+      'table(/)': 'routeNotFoundPageView',
+      'table/:name(/)': 'routeNotFoundPageView',
+      'table/:name/:id(/)': 'routeDefault',
 
       '*default': 'routeDefault'
     },
@@ -79,7 +81,7 @@ $(function() {
         });
     },
 
-    /* global AppModel AppFormPageView */
+    /* global AppModel AppFormPageView AppFormSectionPageView AppFormFieldPageView fieldTypes */
     routeAppFormPageView(id) {
       const model = new AppModel();
 
@@ -93,10 +95,10 @@ $(function() {
             mainView = view;
 
             mainView.on('openSection', sectionIndex => {
-              console.log('OPEN SECTION');
+              renderSection(sectionIndex);
             });
             mainView.on('openField', (sectionIndex, rowIndex, fieldIndex) => {
-              console.log('OPEN FIELD');
+              renderField(sectionIndex, rowIndex, fieldIndex);
             });
 
             const update = (replaceFragment = true) => {
@@ -134,6 +136,73 @@ $(function() {
           });
       };
 
+      const renderSection = sectionIndex => {
+        return Promise.resolve()
+          .then(() => {
+            const view = new AppFormSectionPageView({ model, sectionIndex });
+            return mainView.swapWith(view);
+          })
+          .then(view => {
+            mainView = view;
+
+            mainView.on('navigateBack', () => {
+              renderHome();
+            });
+
+            app.setTitle('Section');
+            app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'New App Module' }], true);
+
+            if (this._showFocus) {
+              app.titleElement.focus();
+            } else {
+              this._showFocus = true;
+            }
+          })
+          .catch(error => {
+            /* eslint-disable no-console */
+            if (window.console && console.error) {
+              console.error('Error', error);
+            }
+            /* eslint-enabled no-console */
+
+            alert('An error has occured.');
+          });
+      };
+
+
+      const renderField = (sectionIndex, rowIndex, fieldIndex) => {
+        return Promise.resolve()
+          .then(() => {
+            const view = new AppFormFieldPageView({ model, sectionIndex, rowIndex, fieldIndex, fieldTypes });
+            return mainView.swapWith(view);
+          })
+          .then(view => {
+            mainView = view;
+
+            mainView.on('navigateBack', () => {
+              renderHome();
+            });
+
+            app.setTitle('Field');
+            app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'New App Module' }], true);
+
+            if (this._showFocus) {
+              app.titleElement.focus();
+            } else {
+              this._showFocus = true;
+            }
+          })
+          .catch(error => {
+            /* eslint-disable no-console */
+            if (window.console && console.error) {
+              console.error('Error', error);
+            }
+            /* eslint-enabled no-console */
+
+            alert('An error has occured.');
+          });
+      };
+
       return Promise.resolve()
         .then(() => {
           if (id !== 'new') {
@@ -151,22 +220,21 @@ $(function() {
           }
 
           // TODO - VERIFY
-          if (nextRouteFunction === 'routeAppFormPageView__section') {
-            return false;
-          }
+          // if (nextRouteFunction === 'routeAppFormPageView__section') {
+          //   return false;
+          // }
 
           // TODO - VERIFY
-          if (nextRouteFunction === 'routeAppFormPageView__row') {
-            return false;
-          }
+          // if (nextRouteFunction === 'routeAppFormPageView__row') {
+          //   return false;
+          // }
 
           // TODO - VERIFY
-          if (nextRouteFunction === 'routeAppFormPageView__field') {
-            return false;
-          }
+          // if (nextRouteFunction === 'routeAppFormPageView__field') {
+          //   return false;
+          // }
 
-          // TODO - VERIFY
-          if (model.hasChangedSinceSnapShot() && !confirm('Changes')) {
+          if (model.hasChangedSinceSnapShot() && !confirm('You have unsaved changes, would you like to proceed?')) {
             return false;
           }
         });
@@ -204,18 +272,46 @@ $(function() {
         });
     },
 
-    routeTablePageView() {
+    /* global FormView FormPageView FormModel */
+    routeFormPageView(name, id) {
       return Promise.resolve()
         .then(() => {
-          const collection = new AppCollection();
-          const view = new AppTablePageView({ collection });
+          return doAjax({
+            url: `/* @echo C3DATA_MEDIA_URL */('${name}.form.json')/$value`,
+            method: 'GET'
+          }).then(response => {
+            return response.data;
+          });
+        })
+        .then(formDefinition => {
+          const NewFormModel = FormModel.extend({
+            datatableColumns: formDefinition.datatableColumns,
+            urlRoot: `/* @echo C3DATA_BASE_URL *//${formDefinition.entity}`
+          });
+          const model = new NewFormModel();
+
+          if (id !== 'new') {
+            model.set(model.idAttribute, id);
+            return model.fetch().then(() => {
+              return { formDefinition, model };
+            });
+          }
+
+          return { formDefinition, model };
+        })
+        .then(({ formDefinition, model }) => {
+          const NewFormView = FormView.extend({ formDefinition });
+          const NewFormPageView = FormPageView.extend({
+            formView: NewFormView
+          });
+          const view = new NewFormPageView({ model });
           return mainView.swapWith(view);
         })
         .then(view => {
           mainView = view;
 
-          app.setTitle(APP_TITLE);
-          app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }], true);
+          app.setTitle('Form');
+          app.setBreadcrumb([{ name: 'Form' }], true);
 
           if (this._showFocus) {
             app.titleElement.focus();
@@ -236,11 +332,11 @@ $(function() {
         });
     },
 
-    routeFormPageView() {
+    routeTablePageView() {
       return Promise.resolve()
         .then(() => {
-          const model = new AppModel();
-          const view = new AppFormPageView({ model });
+          const collection = new AppCollection();
+          const view = new AppTablePageView({ collection });
           return mainView.swapWith(view);
         })
         .then(view => {
