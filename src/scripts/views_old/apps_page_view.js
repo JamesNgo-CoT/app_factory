@@ -4,54 +4,54 @@
 // APPS DATATABLE VIEW
 ////////////////////////////////////////////////////////////////////////////////
 
-const AppsDatatableView = FilteredDatatableView.extend({
-  datatableDefinition() {
-    return {
-      columns: [
-        {
-          title: 'Modified On',
-          data: '__ModifiedOn',
-          type: 'date'
-        },
-        {
-          title: 'App',
-          data: 'app'
-        },
-        {
-          title: 'Description',
-          data: 'description',
-          className: 'descriptionCol'
-        },
-        {
-          title: 'Status',
-          data: 'status',
-          choices: [{ text: '- Select -', value: '' }, { text: 'Active' }, { text: 'Inactive' }],
-          width: 100
-        },
-        {
-          className: 'buttonsCol excludeFromButtons',
-          data: 'id',
-          // orderable: false,
-          render(data) {
-            return `<button type="button" data-id="${data}" class="btn btn-default btn-edit">Edit</button>`;
+  const AppsDatatableView = FilteredDatatableView.extend({
+    datatableDefinition() {
+      return {
+        columns: [
+          {
+            title: 'Modified On',
+            data: '__ModifiedOn',
+            type: 'date'
           },
-          searchable: false,
-          width: 50
-        }
-      ],
-      serverSide: true,
-      stateSave: true
-    };
-  },
+          {
+            title: 'App',
+            data: 'app'
+          },
+          {
+            title: 'Description',
+            data: 'description',
+            className: 'descriptionCol'
+          },
+          {
+            title: 'Status',
+            data: 'status',
+            choices: [{ text: '- Select -', value: '' }, { text: 'Active' }, { text: 'Inactive' }],
+            width: 100
+          },
+          {
+            className: 'buttonsCol excludeFromButtons',
+            data: 'id',
+            // orderable: false,
+            render(data) {
+              return `<button type="button" data-id="${data}" class="btn btn-default btn-edit">Edit</button>`;
+            },
+            searchable: false,
+            width: 50
+          }
+        ],
+        serverSide: true,
+        stateSave: true
+      };
+    },
 
-  buttons: DatatableView.withButtons.buttons,
-  dom: DatatableView.withButtons.dom,
-  doButtonsCopy: DatatableView.withButtons.methods.doButtonsCopy,
-  doButtonsCsv: DatatableView.withButtons.methods.doButtonsCsv,
-  doButtonsExcel: DatatableView.withButtons.methods.doButtonsExcel,
-  doButtonsPdf: DatatableView.withButtons.methods.doButtonsPdf,
-  doButtonsPrint: DatatableView.withButtons.methods.doButtonsPrint
-});
+    buttons: DatatableView.withButtons.buttons,
+    dom: DatatableView.withButtons.dom,
+    doButtonsCopy: DatatableView.withButtons.methods.doButtonsCopy,
+    doButtonsCsv: DatatableView.withButtons.methods.doButtonsCsv,
+    doButtonsExcel: DatatableView.withButtons.methods.doButtonsExcel,
+    doButtonsPdf: DatatableView.withButtons.methods.doButtonsPdf,
+    doButtonsPrint: DatatableView.withButtons.methods.doButtonsPrint
+  });
 
 ////////////////////////////////////////////////////////////////////////////////
 // APPS PAGE VIEW

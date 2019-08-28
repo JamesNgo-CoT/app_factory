@@ -1,88 +1,42 @@
 {
-  "app": "string",
+  "name": "string",
+  "entity": "string",
   "description": "string",
+
   "formtitle": "string",
-  "datatabletitle": "string",
-  "status": "string",
-  "fields": [
+  "tabletitle": "string",
+
+  "sections": [
     {
-      "type": "string",
-      "id": "string",
+      "name": "string",
+      "title": "string",
+      "cols": 4,
 
-      "datatableColumn": "string",
+      "rows": [
+        {
+          "name": "string",
 
-      "section_title": "string",
+          "fields": [
+            {
+              "name": "string",
+              "type": "string",
+              "colspan": "1",
 
-      "text_title": "string",
-      "text_required": "string",
-      "text_disbled": "string",
-      "text_readonly": "string",
-      "text_infohelp": "string",
-      "text_prehelptext": "string",
-      "text_posthelptext": "string",
-      "text_placeholder": "string",
-      "text_value": "string",
-
-      "textarea_title": "string",
-      "textarea_required": "string",
-      "textarea_disbled": "string",
-      "textarea_readonly": "string",
-      "textarea_infohelp": "string",
-      "textarea_prehelptext": "string",
-      "textarea_posthelptext": "string",
-      "textarea_placeholder": "string",
-      "textarea_value": "string",
-      "textarea_cols": "string",
-      "textarea_rows": "string",
-
-      "dropdown_title": "string",
-      "dropdown_required": "string",
-      "dropdown_disbled": "string",
-      "dropdown_readonly": "string",
-      "dropdown_infohelp": "string",
-      "dropdown_prehelptext": "string",
-      "dropdown_posthelptext": "string",
-      "dropdown_placeholder": "string",
-      "dropdown_value": "string",
-      "dropdown_choices": "string",
-
-      "radio_title": "string",
-      "radio_required": "string",
-      "radio_disbled": "string",
-      "radio_readonly": "string",
-      "radio_infohelp": "string",
-      "radio_prehelptext": "string",
-      "radio_posthelptext": "string",
-      "radio_value": "string",
-      "radio_choices": "string",
-      "radio_orientation": "string",
-
-      "checkbox_title": "string",
-      "checkbox_required": "string",
-      "checkbox_disbled": "string",
-      "checkbox_readonly": "string",
-      "checkbox_infohelp": "string",
-      "checkbox_prehelptext": "string",
-      "checkbox_posthelptext": "string",
-      "checkbox_value": "string",
-      "checkbox_choices": "string",
-      "checkbox_orientation": "string",
-
-      "html_html": "string"
+              "validations": [
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
-  "validations": [
-    {
-      "validator": "string"
-    }
-  ],
+
   "rules": [
     {
-      "field": "string",
-      "condition": "string",
-      "conditionoption": "string",
-      "effect": "string",
-      "effectedfields": "string"
+      "type": "string"
     }
   ]
 }

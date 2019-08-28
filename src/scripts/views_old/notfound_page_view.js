@@ -2,10 +2,8 @@
 
 /* exported NotFoundPageView */
 const NotFoundPageView = BaseView.extend({
-  className: 'notFoundPageView',
-
   render() {
-    this.el.innerHTML = `<p>NotFoundPageView</p>`;
+    this.el.innerHTML = `<p>Page not found.</p>`;
     return BaseView.prototype.render.call(this);
   }
 });
