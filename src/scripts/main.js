@@ -1,12 +1,7 @@
-// The main javascript file for app_factory.
-// IMPORTANT:
-// Any resources from this project should be referenced using SRC_PATH preprocessor var
-// Ex: let myImage = '/*@echo SRC_PATH*//img/sample.jpg';
-
-/* global $ Backbone doAjax cot_app BaseRouter LoadingPageView */
+/* global $ cot_app Backbone BaseRouter LoadingPageView */
 
 $(function() {
-  const APP_TITLE = 'App Modules';
+  const APP_TITLE = 'Modules';
 
   const app = new cot_app(APP_TITLE, {
     hasContentTop: false,
@@ -15,359 +10,229 @@ $(function() {
     hasContentLeft: false,
     searchcontext: 'INTRA'
   });
-  app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }], true);
+
+  app.setBreadcrumb([{ name: APP_TITLE }], true);
   app.render();
 
-  const container = document.getElementById('app_factory_container');
-  const mainViewContainer = container.appendChild(document.createElement('div'));
-
+  // Render Loading Page View and Set Initial Main View
   let mainView = new LoadingPageView();
-  mainView.appendTo(mainViewContainer).render();
+  mainView
+    .appendTo(document.getElementById('app_factory_container'))
+    .render()
+    .then(() => {
+      const NewRouter = BaseRouter.extend({
+        defaultFragment: 'configs',
 
-  //////////////////////////////////////////////////////////////////////////////
+        routes: {
+          'configs(/)': 'routeConfigs',
+          'configs/:id(/)': 'routeConfigDetails',
 
-  const AppRouter = BaseRouter.extend({
-    defaultFragment: 'apps',
+          'configs/:id/sections(/)': 'routeDefault',
+          'configs/:id/sections/:section_index(/)': 'routeDefault',
 
-    routes: {
-      'apps(/)': 'routeAppTablePageView',
-      'apps/:id(/)': 'routeAppFormPageView',
-      'apps/:id/home(/)': 'routeAppFormPageView__home',
-      'apps/:id/section(/)': 'routeAppFormPageView__section',
-      'apps/:id/row(/)': 'routeAppFormPageView__row',
-      'apps/:id/field(/)': 'routeAppFormPageView__field',
+          'configs/:id/sections/:section_index/rows(/)': 'routeDefault',
+          'configs/:id/sections/:section_index/rows/:row_index(/)': 'routeDefault',
 
-      'form(/)': 'routeNotFoundPageView',
-      'form/:name(/)': 'routeNotFoundPageView',
-      'form/:name/:id(/)': 'routeFormPageView',
+          'configs/:id/sections/:section_index/rows/:row_index/fields(/)': 'routeDefault',
+          'configs/:id/sections/:section_index/rows/:row_index/fields/:field_index(/)': 'routeDefault',
 
-      'table(/)': 'routeNotFoundPageView',
-      'table/:name(/)': 'routeNotFoundPageView',
-      'table/:name/:id(/)': 'routeDefault',
+          'configs/:id/sections/:section_index/rows/:row_index/fields/:field_index/validations(/)': 'routeDefault',
+          'configs/:id/sections/:section_index/rows/:row_index/fields/:field_index/validations/:validation_index(/)':
+            'routeDefault',
 
-      '*default': 'routeDefault'
-    },
+          'configs/:id/rules(/)': 'routeDefault',
+          'configs/:id/rules/:rule_index(/)': 'routeDefault',
 
-    /* global AppCollection AppTablePageView */
-    routeAppTablePageView() {
-      return Promise.resolve()
-        .then(() => {
-          const collection = new AppCollection();
-          const view = new AppTablePageView({ collection });
-          return mainView.swapWith(view);
-        })
-        .then(view => {
-          mainView = view;
+          'forms(/)': 'routeFormNotFound',
+          'forms/:name(/)': 'routeDefault',
+          'forms/:name/thankyou(/)': 'routeDefault',
 
-          app.setTitle(APP_TITLE);
-          app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }], true);
+          'data(/)': 'routeDataNotFound',
+          'data/:name(/)': 'routeDefault',
+          'data/:name/:id(/)': 'routeDefault',
 
-          if (this._showFocus) {
-            app.titleElement.focus();
-          } else {
-            this._showFocus = true;
-          }
+          '*default': 'routeDefault'
+        },
 
-          return () => {};
-        })
-        .catch(error => {
-          /* eslint-disable no-console */
-          if (window.console && console.error) {
-            console.error('Error', error);
-          }
-          /* eslint-enabled no-console */
+        // Configs
 
-          alert('An error has occured.');
-        });
-    },
+        //////////
+        /* global ConfigCollection ConfigsPageView */
+        routeConfigs() {
+          return (
+            Promise.resolve()
+              // Render Loading Page View
+              .then(() => {
+                if (!(mainView instanceof LoadingPageView)) {
+                  const view = new LoadingPageView();
+                  return mainView.swapWith(view).then(() => {
+                    mainView = view;
+                  });
+                }
+              })
+              // Render Configs Page View
+              .then(() => {
+                const collection = new ConfigCollection();
+                const view = new ConfigsPageView({ collection });
+                return mainView.swapWith(view).then(() => {
+                  mainView = view;
+                });
+              })
+              // Set Title, Breadcrumb, Focus and Cleanup Callback
+              .then(() => {
+                app.setTitle(APP_TITLE);
+                app.setBreadcrumb([{ name: APP_TITLE }], true);
 
-    /* global AppModel AppFormPageView AppFormSectionPageView AppFormFieldPageView fieldTypes */
-    routeAppFormPageView(id) {
-      const model = new AppModel();
+                if (this._showFocus) {
+                  app.titleElement.focus();
+                } else {
+                  this._showFocus = true;
+                }
 
-      const renderHome = () => {
-        return Promise.resolve()
-          .then(() => {
-            const view = new AppFormPageView({ model });
-            return mainView.swapWith(view);
-          })
-          .then(view => {
-            mainView = view;
+                return () => {};
+              })
+              // Catch Unexpected Errors
+              .catch(error => {
+                /* eslint-disable no-console */
+                if (window.console && console.error) {
+                  console.error('Error', error);
+                }
+                /* eslint-enabled no-console */
 
-            mainView.on('openSection', sectionIndex => {
-              renderSection(sectionIndex);
-            });
-            mainView.on('openField', (sectionIndex, rowIndex, fieldIndex) => {
-              renderField(sectionIndex, rowIndex, fieldIndex);
-            });
+                alert('An error has occured.');
+              })
+          );
+        },
 
-            const update = (replaceFragment = true) => {
-              if (model.isNew()) {
-                app.setTitle('New App Module');
-                app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'New App Module' }], true);
-              } else {
-                app.setTitle(`App Module: ${model.get('name')}`);
-                app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'App Module' }], true);
-              }
+        //////////
+        /* global ConfigModel ConfigDetailsPageView */
+        routeConfigDetails(id) {
+          return (
+            Promise.resolve()
+              // Render Loading Page View
+              .then(() => {
+                if (!(mainView instanceof LoadingPageView)) {
+                  const view = new LoadingPageView();
+                  return mainView.swapWith(view).then(() => {
+                    mainView = view;
+                  });
+                }
+              })
+              // Load Config Details Model
+              .then(() => {
+                if (
+                  !this.configModel ||
+                  (id === 'new' && !this.configModel.isNew()) ||
+                  (id !== 'new' && this.configModel.id !== id)
+                ) {
+                  // Reset Config Model
+                  this.configModel = new ConfigModel();
 
-              if (replaceFragment) {
-                const newId = model.isNew() ? 'new' : model.id;
-                this.lastFragment = `apps/${newId}`;
-                this.navigate(this.lastFragment, { trigger: false, replace: true });
-              }
-            };
-            update(false);
-            mainView.listenTo(model, `change:${model.idAttribute}`, update);
+                  if (id !== 'new') {
+                    this.configModel.set({ id });
+                    return this.configModel.fetch();
+                  }
+                }
+              })
+              // Render Config Details Page View
+              .then(() => {
+                const model = this.configModel;
+                const view = new ConfigDetailsPageView({ model });
+                return mainView.swapWith(view).then(() => {
+                  mainView = view;
+                });
+              })
+              // Set Title, Breadcrumb, Focus and Cleanup Callback
+              .then(() => {
+                const update = () => {
+                  if (this.configModel.isNew()) {
+                    app.setTitle('New Model');
+                    app.setBreadcrumb([{ name: APP_TITLE, link: '#configs' }, { name: 'New Model' }], true);
+                  } else {
+                    app.setTitle(`${this.configModel.get('name')} (Model)`);
+                    app.setBreadcrumb(
+                      [{ name: APP_TITLE, link: '#configs' }, { name: `${this.configModel.get('name')} (Model)` }],
+                      true
+                    );
+                  }
+                };
 
-            if (this._showFocus) {
-              app.titleElement.focus();
-            } else {
-              this._showFocus = true;
-            }
-          })
-          .catch(error => {
-            /* eslint-disable no-console */
-            if (window.console && console.error) {
-              console.error('Error', error);
-            }
-            /* eslint-enabled no-console */
+                update();
 
-            alert('An error has occured.');
-          });
-      };
+                mainView.listenTo(this.configModel, `change:${this.configModel.idAttribute}`, update);
+                mainView.listenTo(this.configModel, 'change:name', update);
 
-      const renderSection = sectionIndex => {
-        return Promise.resolve()
-          .then(() => {
-            const view = new AppFormSectionPageView({ model, sectionIndex });
-            return mainView.swapWith(view);
-          })
-          .then(view => {
-            mainView = view;
+                if (this._showFocus) {
+                  app.titleElement.focus();
+                } else {
+                  this._showFocus = true;
+                }
 
-            mainView.on('navigateBack', () => {
-              renderHome();
-            });
+                return nextRoute => {
+                  // TODO Add Valid Next Routes
+                  if (this.configModel.hasChangedSinceSnapShot() && nextRoute !== 'routeDefault') {
+                    if (confirm('Changes will not be saved. Click Ok to proceed.')) {
+                      this.configModel = null;
+                    } else {
+                      return false;
+                    }
+                  }
+                };
+              })
+              // Catch Unexpected Errors
+              .catch(error => {
+                /* eslint-disable no-console */
+                if (window.console && console.error) {
+                  console.error('Error', error);
+                }
+                /* eslint-enabled no-console */
 
-            app.setTitle('Section');
-            app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'New App Module' }], true);
+                alert('An error has occured.');
+              })
+          );
+        },
 
-            if (this._showFocus) {
-              app.titleElement.focus();
-            } else {
-              this._showFocus = true;
-            }
-          })
-          .catch(error => {
-            /* eslint-disable no-console */
-            if (window.console && console.error) {
-              console.error('Error', error);
-            }
-            /* eslint-enabled no-console */
+        // Sections
 
-            alert('An error has occured.');
-          });
-      };
+        routeConfigSections() {},
 
+        routeConfigSectionDetails() {},
 
-      const renderField = (sectionIndex, rowIndex, fieldIndex) => {
-        return Promise.resolve()
-          .then(() => {
-            const view = new AppFormFieldPageView({ model, sectionIndex, rowIndex, fieldIndex, fieldTypes });
-            return mainView.swapWith(view);
-          })
-          .then(view => {
-            mainView = view;
+        // Rows
 
-            mainView.on('navigateBack', () => {
-              renderHome();
-            });
+        routeConfigSectionRows() {},
 
-            app.setTitle('Field');
-            app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'New App Module' }], true);
+        routeConfigSectionRowDetails() {},
 
-            if (this._showFocus) {
-              app.titleElement.focus();
-            } else {
-              this._showFocus = true;
-            }
-          })
-          .catch(error => {
-            /* eslint-disable no-console */
-            if (window.console && console.error) {
-              console.error('Error', error);
-            }
-            /* eslint-enabled no-console */
+        // Fields
 
-            alert('An error has occured.');
-          });
-      };
+        routeConfigSectionRowFields() {},
 
-      return Promise.resolve()
-        .then(() => {
-          if (id !== 'new') {
-            model.set({ id });
-            return model.fetch();
-          } else {
-            model.setSnapShot();
-          }
-        })
-        .then(() => renderHome())
-        .then(() => nextRouteFunction => {
-          if (nextRouteFunction === 'routeAppFormPageView__home') {
-            renderHome();
-            return false;
-          }
+        routeConfigSectionRowFieldDetails() {},
 
-          // TODO - VERIFY
-          // if (nextRouteFunction === 'routeAppFormPageView__section') {
-          //   return false;
-          // }
+        // Validations
 
-          // TODO - VERIFY
-          // if (nextRouteFunction === 'routeAppFormPageView__row') {
-          //   return false;
-          // }
+        routeConfigSectionRowFieldValidations() {},
 
-          // TODO - VERIFY
-          // if (nextRouteFunction === 'routeAppFormPageView__field') {
-          //   return false;
-          // }
+        routeConfigSectionRowFieldValidationDetails() {},
 
-          if (model.hasChangedSinceSnapShot() && !confirm('You have unsaved changes, would you like to proceed?')) {
-            return false;
-          }
-        });
-    },
+        // Rules
 
-    /* global NotFoundPageView */
-    routeNotFoundPageView() {
-      return Promise.resolve()
-        .then(() => {
-          const view = new NotFoundPageView();
-          return mainView.swapWith(view);
-        })
-        .then(view => {
-          mainView = view;
+        routeConfigRules() {},
 
-          app.setTitle('Page Not Found');
-          app.setBreadcrumb([{ name: 'Page Not Found' }], true);
+        routeConfigRuleDetails() {},
 
-          if (this._showFocus) {
-            app.titleElement.focus();
-          } else {
-            this._showFocus = true;
-          }
+        // Forms
 
-          return () => {};
-        })
-        .catch(error => {
-          /* eslint-disable no-console */
-          if (window.console && console.error) {
-            console.error('Error', error);
-          }
-          /* eslint-enabled no-console */
+        routeFormNotFound() {},
 
-          alert('An error has occured.');
-        });
-    },
+        // Data
 
-    /* global FormView FormPageView FormModel */
-    routeFormPageView(name, id) {
-      return Promise.resolve()
-        .then(() => {
-          return doAjax({
-            url: `/* @echo C3DATA_MEDIA_URL */('${name}.form.json')/$value`,
-            method: 'GET'
-          }).then(response => {
-            return response.data;
-          });
-        })
-        .then(formDefinition => {
-          const NewFormModel = FormModel.extend({
-            datatableColumns: formDefinition.datatableColumns,
-            urlRoot: `/* @echo C3DATA_BASE_URL *//${formDefinition.entity}`
-          });
-          const model = new NewFormModel();
+        routeDataNotFound() {}
+      });
 
-          if (id !== 'new') {
-            model.set(model.idAttribute, id);
-            return model.fetch().then(() => {
-              return { formDefinition, model };
-            });
-          }
+      new NewRouter();
 
-          return { formDefinition, model };
-        })
-        .then(({ formDefinition, model }) => {
-          const NewFormView = FormView.extend({ formDefinition });
-          const NewFormPageView = FormPageView.extend({
-            formView: NewFormView
-          });
-          const view = new NewFormPageView({ model });
-          return mainView.swapWith(view);
-        })
-        .then(view => {
-          mainView = view;
-
-          app.setTitle('Form');
-          app.setBreadcrumb([{ name: 'Form' }], true);
-
-          if (this._showFocus) {
-            app.titleElement.focus();
-          } else {
-            this._showFocus = true;
-          }
-
-          return () => {};
-        })
-        .catch(error => {
-          /* eslint-disable no-console */
-          if (window.console && console.error) {
-            console.error('Error', error);
-          }
-          /* eslint-enabled no-console */
-
-          alert('An error has occured.');
-        });
-    },
-
-    routeTablePageView() {
-      return Promise.resolve()
-        .then(() => {
-          const collection = new AppCollection();
-          const view = new AppTablePageView({ collection });
-          return mainView.swapWith(view);
-        })
-        .then(view => {
-          mainView = view;
-
-          app.setTitle(APP_TITLE);
-          app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }], true);
-
-          if (this._showFocus) {
-            app.titleElement.focus();
-          } else {
-            this._showFocus = true;
-          }
-
-          return () => {};
-        })
-        .catch(error => {
-          /* eslint-disable no-console */
-          if (window.console && console.error) {
-            console.error('Error', error);
-          }
-          /* eslint-enabled no-console */
-
-          alert('An error has occured.');
-        });
-    }
-  });
-
-  new AppRouter();
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  Backbone.history.start();
+      Backbone.history.start();
+    });
 });
