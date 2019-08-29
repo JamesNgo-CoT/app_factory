@@ -131,6 +131,8 @@ $(function() {
                   if (id !== 'new') {
                     this.configModel.set({ id });
                     return this.configModel.fetch();
+                  } else {
+                    this.configModel.setSnapShot();
                   }
                 }
               })
@@ -170,6 +172,7 @@ $(function() {
 
                 return nextRoute => {
                   // TODO Add Valid Next Routes
+                  console.log(this.configModel.hasChangedSinceSnapShot());
                   if (this.configModel.hasChangedSinceSnapShot() && nextRoute !== 'routeDefault') {
                     if (confirm('Changes will not be saved. Click Ok to proceed.')) {
                       this.configModel = null;

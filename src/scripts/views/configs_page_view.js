@@ -1,50 +1,94 @@
 /* global BaseView DatatableView FilteredDatatableView */
 
+const ConfigsPageView_DatatableView = FilteredDatatableView.extend({
+  datatableDefinition() {
+    return {
+      columns: [
+        {
+          className: 'excludeFromButtons',
+          data: 'id',
+          // orderable: false, // TODO Uncomment when fixed
+          render(data, type, row) {
+            return `
+            <a href="#configs/${data}" class="btn btn-default btn-edit">
+              Open<span class="sr-only">${row.name} Module</span>
+            </a>
+          `;
+          },
+          searchable: false,
+          width: 50
+        },
+        {
+          title: 'Name',
+          data: 'name'
+        },
+        {
+          title: 'Description',
+          data: 'description'
+        },
+        {
+          title: 'Entity',
+          data: 'entity'
+        }
+      ],
+      serverSide: true,
+      stateSave: true
+    };
+  },
+
+  buttons: DatatableView.withButtons.buttons,
+  dom: DatatableView.withButtons.dom,
+  doButtonsCopy: DatatableView.withButtons.methods.doButtonsCopy,
+  doButtonsCsv: DatatableView.withButtons.methods.doButtonsCsv,
+  doButtonsExcel: DatatableView.withButtons.methods.doButtonsExcel,
+  doButtonsPdf: DatatableView.withButtons.methods.doButtonsPdf,
+  doButtonsPrint: DatatableView.withButtons.methods.doButtonsPrint
+});
+
 /* exported ConfigsPageView */
-const ConfigsPageView = BaseView.extend(
-  {
-    className: 'configsPageView',
+const ConfigsPageView = BaseView.extend({
+  className: 'configsPageView',
 
-    events: {
-      ['click .btn-resetFilters'](event) {
-        event.preventDefault();
-        this.datatableView.resetFilters();
-      },
-
-      ['click .dropdown-menu-copy'](event) {
-        event.preventDefault();
-        this.datatableView.doButtonsCopy();
-      },
-      ['click .dropdown-menu-csv'](event) {
-        event.preventDefault();
-        this.datatableView.doButtonsCsv();
-      },
-      ['click .dropdown-menu-excel'](event) {
-        event.preventDefault();
-        this.datatableView.doButtonsExcel();
-      },
-      ['click .dropdown-menu-pdf'](event) {
-        event.preventDefault();
-        this.datatableView.doButtonsPdf();
-      },
-      ['click .dropdown-menu-print'](event) {
-        event.preventDefault();
-        this.datatableView.doButtonsPrint();
-      }
+  events: {
+    ['click .btn-resetFilters'](event) {
+      event.preventDefault();
+      this.datatableView.resetFilters();
     },
 
-    render() {
-      this.removeSubViews();
-      while (this.el.firstChild) {
-        this.el.removeChild(this.el.firstChild);
-      }
-      this.subViews = {};
+    ['click .dropdown-menu-copy'](event) {
+      event.preventDefault();
+      this.datatableView.doButtonsCopy();
+    },
+    ['click .dropdown-menu-csv'](event) {
+      event.preventDefault();
+      this.datatableView.doButtonsCsv();
+    },
+    ['click .dropdown-menu-excel'](event) {
+      event.preventDefault();
+      this.datatableView.doButtonsExcel();
+    },
+    ['click .dropdown-menu-pdf'](event) {
+      event.preventDefault();
+      this.datatableView.doButtonsPdf();
+    },
+    ['click .dropdown-menu-print'](event) {
+      event.preventDefault();
+      this.datatableView.doButtonsPrint();
+    }
+  },
 
-      const fragment = document.createDocumentFragment();
+  render() {
+    this.removeSubViews();
+    while (this.el.firstChild) {
+      this.el.removeChild(this.el.firstChild);
+    }
+    this.subViews = {};
 
-      const topRow = fragment.appendChild(document.createElement('div'));
-      topRow.classList.add('row', 'row-buttons');
-      topRow.innerHTML = `
+    const fragment = document.createDocumentFragment();
+
+    const topRow = fragment.appendChild(document.createElement('div'));
+    topRow.classList.add('row', 'row-buttons');
+    topRow.innerHTML = `
       <div class="col-xs-6">
         <a href="#configs/new" class="btn btn-default btn-new">New Module</a>
       </div>
@@ -66,13 +110,13 @@ const ConfigsPageView = BaseView.extend(
       </div>
     `;
 
-      const collection = this.collection;
-      this.subViews.datatableView = new ConfigsPageView.DatatableView({ collection });
-      const renderPromise = this.subViews.datatableView.appendTo(fragment).render();
+    const collection = this.collection;
+    this.subViews.datatableView = new ConfigsPageView_DatatableView({ collection });
+    const renderPromise = this.subViews.datatableView.appendTo(fragment).render();
 
-      const bottomRow = fragment.appendChild(document.createElement('div'));
-      bottomRow.classList.add('row', 'row-buttons');
-      bottomRow.innerHTML = `
+    const bottomRow = fragment.appendChild(document.createElement('div'));
+    bottomRow.classList.add('row', 'row-buttons');
+    bottomRow.innerHTML = `
       <div class="col-xs-6">
         <a href="#configs/new" class="btn btn-default btn-new">New Module</a>
       </div>
@@ -94,56 +138,8 @@ const ConfigsPageView = BaseView.extend(
       </div>
     `;
 
-      this.el.appendChild(fragment);
+    this.el.appendChild(fragment);
 
-      return renderPromise.then(() => BaseView.prototype.render.call(this));
-    }
-  },
-  {
-    // Subview: Datatable View
-    DatatableView: FilteredDatatableView.extend({
-      datatableDefinition() {
-        return {
-          columns: [
-            {
-              className: 'excludeFromButtons',
-              data: 'id',
-              // orderable: false, // TODO Uncomment when fixed
-              render(data, type, row) {
-                return `
-                <a href="#configs/${data}" class="btn btn-default btn-edit">
-                  Open<span class="sr-only">${row.name} Module</span>
-                </a>
-              `;
-              },
-              searchable: false,
-              width: 50
-            },
-            {
-              title: 'Name',
-              data: 'name'
-            },
-            {
-              title: 'Description',
-              data: 'description'
-            },
-            {
-              title: 'Entity',
-              data: 'entity'
-            }
-          ],
-          serverSide: true,
-          stateSave: true
-        };
-      },
-
-      buttons: DatatableView.withButtons.buttons,
-      dom: DatatableView.withButtons.dom,
-      doButtonsCopy: DatatableView.withButtons.methods.doButtonsCopy,
-      doButtonsCsv: DatatableView.withButtons.methods.doButtonsCsv,
-      doButtonsExcel: DatatableView.withButtons.methods.doButtonsExcel,
-      doButtonsPdf: DatatableView.withButtons.methods.doButtonsPdf,
-      doButtonsPrint: DatatableView.withButtons.methods.doButtonsPrint
-    })
+    return renderPromise.then(() => BaseView.prototype.render.call(this));
   }
-);
+});
