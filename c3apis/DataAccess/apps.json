@@ -1,6 +1,5 @@
 {
   "name": "string",
-  "entity": "string",
   "description": "string",
 
   "formtitle": "string",
@@ -20,13 +19,7 @@
             {
               "name": "string",
               "type": "text",
-              "colspan": "1",
-
-              "validations": [
-                {
-                  "type": "string"
-                }
-              ]
+              "colspan": "1"
             }
           ]
         }

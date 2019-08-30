@@ -5,51 +5,50 @@ const AppModel = BaseModel.extend({
   defaults() {
     return {
       name: 'string',
-      entity: 'string',
       description: 'string',
 
       formtitle: 'string',
       tabletitle: 'string',
 
-      sections: [
-        {
-          name: 'string',
-          title: 'string',
-          cols: '4',
+      sections: [],
 
-          rows: [
-            {
-              name: 'string',
-
-              fields: [
-                {
-                  name: 'string',
-                  type: 'text',
-                  colspan: '1',
-
-                  validations: [
-                    {
-                      type: 'string'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ],
-
-      rules: [
-        {
-          type: 'string'
-        }
-      ]
+      rules: []
     };
   },
 
   urlRoot: '/* @echo C3DATA_APPS_URL */',
 
-  toConfigs(fieldTypes) {
+  adjustSyncJson(json) {
+    json.sections.forEach(section => {
+      section.rows.forEach(row => {
+        row.fields.forEach((field, index) => {
+          if (!field) {
+            row.fields[index] = { type: 'empty' };
+          }
+        });
+      });
+    });
+
+    return json;
+  },
+
+  parse(response, options) {
+    if (response.sections) {
+      response.sections.forEach(section => {
+        section.rows.forEach(row => {
+          row.fields.forEach((field, index) => {
+            if (field && field.type === 'empty') {
+              row.fields[index] = null;
+            }
+          });
+        });
+      });
+    }
+
+    return BaseModel.prototype.parse.call(this, response, options);
+  },
+
+  toConfigs(fieldTypes, ruleTypes, ruleConditions) {
     const returnValue = {
       form: {
         datatableColumns: []
@@ -97,15 +96,14 @@ const AppModel = BaseModel.extend({
 
     const json = this.toJSON();
 
-    returnValue.form.entity = json.entity;
-    returnValue.table.entity = json.entity;
-
     if (json.formtitle) {
       returnValue.form.title = json.formtitle;
     }
     if (json.tabletitle) {
       returnValue.table.title = json.tabletitle;
     }
+
+    const fields = {};
 
     json.sections.forEach(section => {
       if (section.name) {
@@ -125,22 +123,30 @@ const AppModel = BaseModel.extend({
               className: getClassName(+section.cols, 1)
             };
           } else {
+            row.fields[index].className = getClassName(+section.cols, +row.fields[index].colspan);
             const type = row.fields[index].type;
-
             if (fieldTypes && fieldTypes[type] && fieldTypes[type].toConfig) {
               row.fields[index] = fieldTypes[type].toConfig(row.fields[index]);
             }
-
-            if (row.fields[index].name) {
-              row.id = row.name;
-              row.bindTo = row.name;
+            if (row.fields[index].id && row.fields[index].bindTo) {
+              fields[row.fields[index].id] = row.fields[index].bindTo;
             }
-            row.fields[index].className = getClassName(+section.cols, +row.fields[index].colspan);
           }
         }
       });
     });
+
     returnValue.form.sections = json.sections;
+
+    json.postRenders = [];
+
+    json.rules.forEach(rule => {
+      if (rule.action_type && ruleTypes[rule.action_type]) {
+        json.postRenders.push(ruleTypes[rule.action_type].toConfig(rule, fields, ruleConditions));
+      }
+    });
+
+    returnValue.form.postRender = `function(options) {${json.postRenders.join('')}}`;
 
     return returnValue;
   }

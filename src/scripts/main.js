@@ -15,7 +15,7 @@ $(function() {
     hasContentLeft: false,
     searchcontext: 'INTRA'
   });
-  app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }], true);
+  app.setBreadcrumb([{ name: APP_TITLE, link: '#configs' }], true);
   app.render();
 
   const container = document.getElementById('app_factory_container');
@@ -27,15 +27,12 @@ $(function() {
   //////////////////////////////////////////////////////////////////////////////
 
   const AppRouter = BaseRouter.extend({
-    defaultFragment: 'apps',
+    defaultFragment: 'configs',
 
     routes: {
-      'apps(/)': 'routeAppTablePageView',
-      'apps/:id(/)': 'routeAppFormPageView',
-      'apps/:id/home(/)': 'routeAppFormPageView__home',
-      'apps/:id/section(/)': 'routeAppFormPageView__section',
-      'apps/:id/row(/)': 'routeAppFormPageView__row',
-      'apps/:id/field(/)': 'routeAppFormPageView__field',
+      'configs(/)': 'routeAppTablePageView',
+      'configs/:id(/)': 'routeAppFormPageView',
+      'configs/:id/home(/)': 'routeAppFormPageView__home',
 
       'form(/)': 'routeNotFoundPageView',
       'form/:name(/)': 'routeNotFoundPageView',
@@ -54,11 +51,12 @@ $(function() {
         .then(() => {
           const collection = new AppCollection();
           const view = new AppTablePageView({ collection });
-          return mainView.swapWith(view);
-        })
-        .then(view => {
-          mainView = view;
 
+          return mainView.swapWith(view).then(() => {
+            mainView = view;
+          });
+        })
+        .then(() => {
           app.setTitle(APP_TITLE);
           app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }], true);
 
@@ -81,40 +79,46 @@ $(function() {
         });
     },
 
-    /* global AppModel AppFormPageView AppFormSectionPageView AppFormFieldPageView fieldTypes */
+    /* global AppModel AppFormPageView AppFormSectionPageView AppFormFieldPageView fieldTypes AppFormRulePageView */
+    /* global ruleConditions ruleTypes */
     routeAppFormPageView(id) {
       const model = new AppModel();
 
       const renderHome = () => {
         return Promise.resolve()
           .then(() => {
-            const view = new AppFormPageView({ model });
-            return mainView.swapWith(view);
-          })
-          .then(view => {
-            mainView = view;
+            const view = new AppFormPageView({ model, fieldTypes, ruleTypes, ruleConditions });
 
-            mainView.on('openSection', sectionIndex => {
+            view.on('openSection', sectionIndex => {
               renderSection(sectionIndex);
             });
-            mainView.on('openField', (sectionIndex, rowIndex, fieldIndex) => {
+            view.on('openField', (sectionIndex, rowIndex, fieldIndex) => {
               renderField(sectionIndex, rowIndex, fieldIndex);
             });
+            view.on('openRule', ruleIndex => {
+              renderRule(ruleIndex);
+            });
 
-            const update = (replaceFragment = true) => {
-              if (model.isNew()) {
-                app.setTitle('New App Module');
-                app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'New App Module' }], true);
-              } else {
-                app.setTitle(`App Module: ${model.get('name')}`);
-                app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'App Module' }], true);
-              }
+            return mainView.swapWith(view).then(() => {
+              mainView = view;
+            });
+          })
+          .then(() => {
+            const update = () => {
+              app.setTitle(model.isNew() ? 'New App Module' : `App Module: ${model.get('name')}`);
+              app.setBreadcrumb(
+                [
+                  { name: APP_TITLE, link: '#configs' },
+                  model.isNew()
+                    ? { name: 'New App Module', link: '#configs/home' }
+                    : { name: 'App Module', link: `#configs/${id}` }
+                ],
+                true
+              );
 
-              if (replaceFragment) {
-                const newId = model.isNew() ? 'new' : model.id;
-                this.lastFragment = `apps/${newId}`;
-                this.navigate(this.lastFragment, { trigger: false, replace: true });
-              }
+              const newId = model.isNew() ? 'new' : model.id;
+              this.lastFragment = `configs/${newId}`;
+              this.navigate(this.lastFragment, { trigger: false, replace: true });
             };
             update(false);
             mainView.listenTo(model, `change:${model.idAttribute}`, update);
@@ -140,17 +144,27 @@ $(function() {
         return Promise.resolve()
           .then(() => {
             const view = new AppFormSectionPageView({ model, sectionIndex });
-            return mainView.swapWith(view);
-          })
-          .then(view => {
-            mainView = view;
 
-            mainView.on('navigateBack', () => {
+            view.on('navigateBack', () => {
               renderHome();
             });
 
+            return mainView.swapWith(view).then(() => {
+              mainView = view;
+            });
+          })
+          .then(() => {
             app.setTitle('Section');
-            app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'New App Module' }], true);
+            app.setBreadcrumb(
+              [
+                { name: APP_TITLE, link: '#configs' },
+                model.isNew()
+                  ? { name: 'New App Module', link: '#configs/new/home' }
+                  : { name: 'App Module', link: `#configs/${id}/home` },
+                { name: 'Section' }
+              ],
+              true
+            );
 
             if (this._showFocus) {
               app.titleElement.focus();
@@ -169,22 +183,74 @@ $(function() {
           });
       };
 
-
       const renderField = (sectionIndex, rowIndex, fieldIndex) => {
         return Promise.resolve()
           .then(() => {
             const view = new AppFormFieldPageView({ model, sectionIndex, rowIndex, fieldIndex, fieldTypes });
-            return mainView.swapWith(view);
-          })
-          .then(view => {
-            mainView = view;
 
-            mainView.on('navigateBack', () => {
+            view.on('navigateBack', () => {
               renderHome();
             });
 
+            return mainView.swapWith(view).then(() => {
+              mainView = view;
+            });
+          })
+          .then(() => {
             app.setTitle('Field');
-            app.setBreadcrumb([{ name: APP_TITLE, link: '#apps' }, { name: 'New App Module' }], true);
+            app.setBreadcrumb(
+              [
+                { name: APP_TITLE, link: '#configs' },
+                model.isNew()
+                  ? { name: 'New App Module', link: '#configs/new/home' }
+                  : { name: 'App Module', link: `#configs/${id}/home` },
+                { name: 'Field' }
+              ],
+              true
+            );
+
+            if (this._showFocus) {
+              app.titleElement.focus();
+            } else {
+              this._showFocus = true;
+            }
+          })
+          .catch(error => {
+            /* eslint-disable no-console */
+            if (window.console && console.error) {
+              console.error('Error', error);
+            }
+            /* eslint-enabled no-console */
+
+            alert('An error has occured.');
+          });
+      };
+
+      const renderRule = ruleIndex => {
+        return Promise.resolve()
+          .then(() => {
+            const view = new AppFormRulePageView({ model, ruleIndex, ruleConditions, ruleTypes });
+
+            view.on('navigateBack', () => {
+              renderHome();
+            });
+
+            return mainView.swapWith(view).then(() => {
+              mainView = view;
+            });
+          })
+          .then(() => {
+            app.setTitle('Rule');
+            app.setBreadcrumb(
+              [
+                { name: APP_TITLE, link: '#configs' },
+                model.isNew()
+                  ? { name: 'New App Module', link: '#configs/new/home' }
+                  : { name: 'App Module', link: `#configs/${id}/home` },
+                { name: 'Rule' }
+              ],
+              true
+            );
 
             if (this._showFocus) {
               app.titleElement.focus();
@@ -219,21 +285,6 @@ $(function() {
             return false;
           }
 
-          // TODO - VERIFY
-          // if (nextRouteFunction === 'routeAppFormPageView__section') {
-          //   return false;
-          // }
-
-          // TODO - VERIFY
-          // if (nextRouteFunction === 'routeAppFormPageView__row') {
-          //   return false;
-          // }
-
-          // TODO - VERIFY
-          // if (nextRouteFunction === 'routeAppFormPageView__field') {
-          //   return false;
-          // }
-
           if (model.hasChangedSinceSnapShot() && !confirm('You have unsaved changes, would you like to proceed?')) {
             return false;
           }
@@ -245,11 +296,12 @@ $(function() {
       return Promise.resolve()
         .then(() => {
           const view = new NotFoundPageView();
-          return mainView.swapWith(view);
-        })
-        .then(view => {
-          mainView = view;
 
+          return mainView.swapWith(view).then(() => {
+            mainView = view;
+          });
+        })
+        .then(() => {
           app.setTitle('Page Not Found');
           app.setBreadcrumb([{ name: 'Page Not Found' }], true);
 
@@ -272,7 +324,7 @@ $(function() {
         });
     },
 
-    /* global FormView FormPageView FormModel */
+    /* global FormPageView_FormView FormPageView FormModel */
     routeFormPageView(name, id) {
       return Promise.resolve()
         .then(() => {
@@ -286,7 +338,7 @@ $(function() {
         .then(formDefinition => {
           const NewFormModel = FormModel.extend({
             datatableColumns: formDefinition.datatableColumns,
-            urlRoot: `/* @echo C3DATA_BASE_URL *//${formDefinition.entity}`
+            urlRoot: `/* @echo C3DATA_BASE_URL *//${name}`
           });
           const model = new NewFormModel();
 
@@ -300,7 +352,7 @@ $(function() {
           return { formDefinition, model };
         })
         .then(({ formDefinition, model }) => {
-          const NewFormView = FormView.extend({ formDefinition });
+          const NewFormView = FormPageView_FormView.extend({ formDefinition });
           const NewFormPageView = FormPageView.extend({
             formView: NewFormView
           });

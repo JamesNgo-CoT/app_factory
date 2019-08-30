@@ -1,6 +1,36 @@
-/* global Backbone doAjax BaseView AppModel FormView */
+/* global Backbone doAjax BaseView AppModel FormView fieldTypes */
 
-const SectionsView = BaseView.extend({
+const AppFormPageView_PublishingView = BaseView.extend({
+  initialize(options) {
+    this.listenTo(options.model, `change:${options.model.idAttribute}`, () => {
+      this.render();
+    });
+    BaseView.prototype.initialize.call(this, options);
+  },
+
+  render() {
+    while (this.el.firstChild) {
+      this.el.removeChild(this.el.firstChild);
+    }
+
+    if (!this.model.isNew()) {
+      this.el.innerHTML = `
+        <p class="text-right">
+          <button type="button" class="btn btn-default btn-publish">Publish</button>
+          <button type="button" class="btn btn-default btn-unpublish">UnPublish</button> &nbsp;
+          <a href="#form/${this.model.get('name')}/new" class="btn btn-default btn-open-form">Open Form</a>
+          <a href="#table/${this.model.get('name')}" class="btn btn-default btn-open-table">Open Table</a>
+        </p>
+      `;
+    }
+
+    return BaseView.prototype.render.call(this);
+  }
+});
+
+const AppFormPageView_FormView_SectionsView = BaseView.extend({
+  className: 'sectionsView',
+
   events: {
     ['click .btn-add-section'](event) {
       event.preventDefault();
@@ -127,7 +157,6 @@ const SectionsView = BaseView.extend({
             if (sectionIndex != null && rowIndex != null && fieldIndex != null) {
               // To Field
               const sections = this.model.get('sections');
-              console.log(this.dragData.fieldIndex);
               sections[this.dragData.sectionIndex].rows[this.dragData.rowIndex].fields[
                 this.dragData.fieldIndex
               ].colspan = '1';
@@ -201,6 +230,8 @@ const SectionsView = BaseView.extend({
     const fragment = document.createDocumentFragment();
 
     const sections = this.model.get('sections');
+
+
     sections.forEach((section, sectionIndex) => {
       const table = fragment.appendChild(document.createElement('table'));
       table.classList.add('table', 'table-bordered', 'drag-target');
@@ -248,14 +279,13 @@ const SectionsView = BaseView.extend({
             const fieldTd = rowTr.appendChild(document.createElement('td'));
             if (row.fields[fieldIndex]) {
               const field = row.fields[fieldIndex];
-              fieldTd.setAttribute('colspan', field.colspan || 1);
+              fieldTd.setAttribute('colspan', +field.colspan || 1);
               fieldTd.innerHTML = `<button type="button" class="btn btn-default btn-block btn-open-field btn-details" data-section-index="${sectionIndex}" data-row-index="${rowIndex}" data-field-index="${fieldIndex}" draggable="true">${
                 field.title ? '<strong>' + field.title + '</strong>' : 'Untitled'
               }${field.name ? ' (' + field.name + ')' : ''}${field.required ? ' - required' : ''}<br>${
                 field.type
               }</button>`;
-              // fieldIndex = fieldIndex + ((field.colspan || 1) - 1);
-              length = length - ((field.colspan || 1) - 1);
+              length = length - ((+field.colspan || 1) - 1);
             } else {
               fieldTd.innerHTML = `<button type="button" class="btn btn-default btn-block btn-open-field drag-target" data-section-index="${sectionIndex}" data-row-index="${rowIndex}" data-field-index="${fieldIndex}"><span class="glyphicon glyphicon-plus-sign" aria-label="Add Field"></span></button>`;
             }
@@ -284,198 +314,58 @@ const SectionsView = BaseView.extend({
   }
 });
 
-const AppFormView = FormView.extend({
-  formDefinition() {
-    return {
-      sections: [
-        {
-          title: 'Details',
-
-          rows: [
-            {
-              fields: [
-                {
-                  title: 'Name',
-                  type: 'text',
-                  required: true,
-                  bindTo: 'name'
-                },
-                {
-                  title: 'Entity',
-                  type: 'text',
-                  required: true,
-                  bindTo: 'entity',
-
-                  validators: {
-                    regexp: {
-                      regexp: '^[a-zA-Z0-9_]*$',
-                      message: 'Must only contain alphabet or numbers'
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              fields: [
-                {
-                  title: 'Description',
-                  type: 'textarea',
-                  required: false,
-                  bindTo: 'description'
-                }
-              ]
-            },
-            {
-              fields: [
-                {
-                  title: 'Form Title',
-                  type: 'text',
-                  required: false,
-                  bindTo: 'formtitle'
-                },
-                {
-                  title: 'Table Title',
-                  type: 'text',
-                  required: false,
-                  bindTo: 'tabletitle'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          title: 'Sections',
-          id: 'sections',
-
-          rows: [
-            {
-              fields: [
-                {
-                  type: 'html',
-                  html: '',
-
-                  postRender({ model, view, field }) {
-                    view.subViews.sectionsView = new SectionsView({ model });
-
-                    view.subViews.sectionsView.on('openSection', sectionIndex => {
-                      view.trigger('openSection', sectionIndex);
-                    });
-                    view.subViews.sectionsView.on('openField', (sectionIndex, rowIndex, fieldIndex) => {
-                      view.trigger('openField', sectionIndex, rowIndex, fieldIndex);
-                    });
-
-                    const el = document.getElementById(`${field.id}Element`);
-                    return view.subViews.sectionsView.appendTo(el).render();
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        // {
-        //   title: 'Validations',
-
-        //   rows: [
-        //     {
-        //       fields: [
-        //         {
-        //           type: 'html',
-        //           html: ''
-
-                  // postRender({ model, view, field }) {
-                  //   view.removeRuleDatatableView();
-                  //   const el = document.getElementById(`${field.id}Element`);
-                  //   while (el.firstChild) {
-                  //     el.removeChild(el.firstChild);
-                  //   }
-
-                  //   const collection = new RuleCollection(model.get('rules'));
-                  //   collection.each((model, index) => {
-                  //     model.set('order', index + 1);
-                  //   });
-
-                  //   view.fieldDatatableView = new RulesDatatableView({ collection });
-                  //   const renderPromise = view.fieldDatatableView
-                  //     .appendTo(el)
-                  //     .render()
-                  //     .then(() => {
-                  //       let button = view.fieldDatatableView.el.querySelector('th button:not([type="button"])');
-                  //       while (button) {
-                  //         button.setAttribute('type', 'button');
-                  //         button = view.fieldDatatableView.el.querySelector('th button:not([type="button"])');
-                  //       }
-                  //     });
-
-                  //   const buttonRow = el.appendChild(document.createElement('div'));
-                  //   buttonRow.innerHTML = `<button type="button" class="btn btn-default btn-add-rule">Add Rule</button>`;
-
-                  //   return renderPromise;
-                  // }
-        //         }
-        //       ]
-        //     }
-        //   ]
-        // },
-        {
-          title: 'Rules',
-
-          rows: [
-            {
-              fields: [
-                {
-                  type: 'html',
-                  html: ''
-
-                  // postRender({ model, view, field }) {
-                  //   view.removeRuleDatatableView();
-                  //   const el = document.getElementById(`${field.id}Element`);
-                  //   while (el.firstChild) {
-                  //     el.removeChild(el.firstChild);
-                  //   }
-
-                  //   const collection = new RuleCollection(model.get('rules'));
-                  //   collection.each((model, index) => {
-                  //     model.set('order', index + 1);
-                  //   });
-
-                  //   view.fieldDatatableView = new RulesDatatableView({ collection });
-                  //   const renderPromise = view.fieldDatatableView
-                  //     .appendTo(el)
-                  //     .render()
-                  //     .then(() => {
-                  //       let button = view.fieldDatatableView.el.querySelector('th button:not([type="button"])');
-                  //       while (button) {
-                  //         button.setAttribute('type', 'button');
-                  //         button = view.fieldDatatableView.el.querySelector('th button:not([type="button"])');
-                  //       }
-                  //     });
-
-                  //   const buttonRow = el.appendChild(document.createElement('div'));
-                  //   buttonRow.innerHTML = `<button type="button" class="btn btn-default btn-add-rule">Add Rule</button>`;
-
-                  //   return renderPromise;
-                  // }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    };
-  },
-
+const AppFormPageView_FormView_RulesView = BaseView.extend({
   render() {
-    this.removeSubViews();
     while (this.el.firstChild) {
       this.el.removeChild(this.el.firstChild);
     }
-    this.subViews = {};
 
-    return FormView.prototype.render.call(this);
+    const fragment = document.createDocumentFragment();
+
+    const rules = this.model.get('rules');
+    if (rules.length > 0) {
+      // TODO
+      const table = fragment.appendChild(document.createElement('table'));
+      table.classList.add('table', 'table-bordered')
+      table.setAttribute('width', '100%');
+
+      const thead = table.appendChild(document.createElement('thead'));
+      thead.innerHTML = `
+        <tr>
+          <th>Field</th>
+          <th>Condition</th>
+          <th>Action</th>
+          <th>Targets</th>
+          <th>&nbsp;</th>
+        </tr>
+      `;
+
+      const tbody = table.appendChild(document.createElement('tbody'));
+
+      rules.forEach((rule, index) => {
+        const tr = tbody.appendChild(document.createElement('tr'));
+        tr.innerHTML = `
+          <td>${rule.condition_field}</td>
+          <td>${rule.condition_type}</td>
+          <td>${rule.action_type}</td>
+          <td>${rule.action_target.join(', ')}</td>
+          <td><button type="button" class="btn btn-default btn-configure-rule" data-rule-index="${index}">Configure</button></td>
+        `;
+      });
+    }
+
+    const addRuleButton = fragment.appendChild(document.createElement('button'));
+    addRuleButton.setAttribute('type', 'button');
+    addRuleButton.classList.add('btn', 'btn-default', 'btn-add-rule');
+    addRuleButton.innerHTML = 'Add Rule';
+
+    this.el.appendChild(fragment);
+
+    return BaseView.prototype.render.call(this);
   }
 });
 
-const AppFormPageButtonsView = BaseView.extend({
+const AppFormPageView_FormView_ButtonsView = BaseView.extend({
   initialize(options) {
     this.listenTo(options.model, `change:${options.model.idAttribute}`, () => {
       this.render();
@@ -512,31 +402,123 @@ const AppFormPageButtonsView = BaseView.extend({
   }
 });
 
-const AppDetailsPublishingView = BaseView.extend({
-  initialize(options) {
-    this.listenTo(options.model, `change:${options.model.idAttribute}`, () => {
-      this.render();
-    });
-    BaseView.prototype.initialize.call(this, options);
+const AppFormPageView_FormView = FormView.extend({
+  formDefinition() {
+    return {
+      sections: [
+        {
+          title: 'Details',
+
+          rows: [
+            {
+              fields: [
+                {
+                  title: 'Name',
+                  type: 'text',
+                  required: true,
+                  bindTo: 'name',
+                  className: 'col-sm-3',
+
+                  validators: {
+                    regexp: {
+                      regexp: '^[a-zA-Z0-9_]*$',
+                      message: 'Name can only contain alphabet and numbers'
+                    }
+                  }
+                },
+                {
+                  title: 'Description',
+                  type: 'text',
+                  required: false,
+                  bindTo: 'description',
+                  className: 'col-sm-9'
+                }
+              ]
+            },
+            {
+              fields: [
+                {
+                  title: 'Form Title',
+                  type: 'text',
+                  required: false,
+                  bindTo: 'formtitle'
+                },
+                {
+                  title: 'Table Title',
+                  type: 'text',
+                  required: false,
+                  bindTo: 'tabletitle'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          title: 'Sections',
+          id: 'sections',
+
+          rows: [
+            {
+              fields: [
+                {
+                  type: 'html',
+                  html: '',
+
+                  postRender({ model, view, field }) {
+                    view.subViews.sectionsView = new AppFormPageView_FormView_SectionsView({ model });
+
+                    view.subViews.sectionsView.on('openSection', sectionIndex => {
+                      view.trigger('openSection', sectionIndex);
+                    });
+                    view.subViews.sectionsView.on('openField', (sectionIndex, rowIndex, fieldIndex) => {
+                      view.trigger('openField', sectionIndex, rowIndex, fieldIndex);
+                    });
+
+                    const el = document.getElementById(`${field.id}Element`);
+                    return view.subViews.sectionsView.appendTo(el).render();
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          title: 'Rules',
+
+          rows: [
+            {
+              fields: [
+                {
+                  type: 'html',
+                  html: '',
+
+                  postRender({ model, view, field }) {
+                    view.subViews.rulesView = new AppFormPageView_FormView_RulesView({ model });
+
+                    const el = document.getElementById(`${field.id}Element`);
+                    return view.subViews.rulesView.appendTo(el).render();
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
   },
 
   render() {
+    this.removeSubViews();
     while (this.el.firstChild) {
       this.el.removeChild(this.el.firstChild);
     }
+    this.subViews = {};
 
-    if (!this.model.isNew()) {
-      this.el.innerHTML = `
-        <p class="text-right">
-          <button type="button" class="btn btn-default btn-publish">Publish</button>
-          <button type="button" class="btn btn-default btn-unpublish">UnPublish</button> |
-          <a href="#form/${this.model.get('name')}/new" class="btn btn-default btn-open-form">Open Form</a>
-          <a href="#table/${this.model.get('name')}" class="btn btn-default btn-open-table">Open Table</a>
-        </p>
-      `;
-    }
-
-    return BaseView.prototype.render.call(this);
+    return FormView.prototype.render.call(this).then(() => {
+      const model = this.model;
+      this.subViews.buttonsView = new AppFormPageView_FormView_ButtonsView({ model });
+      return this.subViews.buttonsView.appendTo(this.form).render();
+    });
   }
 });
 
@@ -545,6 +527,17 @@ const AppFormPageView = BaseView.extend({
   className: 'appFormPageView',
 
   events: {
+    ['click .btn-add-rule'](event) {
+      event.preventDefault();
+      this.trigger('openRule', -1);
+    },
+
+    ['click .btn-configure-rule'](event) {
+      event.preventDefault();
+      const ruleIndex = event.currentTarget.getAttribute('data-rule-index');
+      this.trigger('openRule', +ruleIndex);
+    },
+
     ['click .btn-save'](event) {
       event.preventDefault();
       this.subViews.formView.form.querySelector('.fv-hidden-submit').click();
@@ -552,7 +545,7 @@ const AppFormPageView = BaseView.extend({
 
     ['click .btn-cancel'](event) {
       event.preventDefault();
-      Backbone.history.navigate('apps', { trigger: true });
+      Backbone.history.navigate('configs', { trigger: true });
     },
 
     ['click .btn-delete'](event) {
@@ -560,7 +553,7 @@ const AppFormPageView = BaseView.extend({
 
       if (prompt('Type "DELETE" to delete this app') === 'DELETE') {
         this.model.destroy().then(() => {
-          Backbone.history.navigate('apps', { trigger: true });
+          Backbone.history.navigate('configs', { trigger: true });
         });
       }
     },
@@ -569,102 +562,103 @@ const AppFormPageView = BaseView.extend({
       event.preventDefault();
 
       event.target.setAttribute('disabled', '');
-      if (prompt('Type "PUBLISH" to publish this app') === 'PUBLISH') {
-        if (
-          !this.model.hasChangedSinceSnapShot() ||
-          confirm(confirm('You have unsaved changes, unsaved changes will not be included. Would you like to proceed?'))
-        ) {
-          const model = new AppModel({ id: this.model.id });
-          model.fetch().then(() => {
-            const configs = model.toConfigs();
-            return Promise.resolve()
-              .then(() => {
-                return doAjax({
-                  url: `/* @echo C3DATA_MEDIA_URL */('${model.get('name')}.form.json')`,
-                  method: 'GET'
-                });
-              })
-              .then(
-                () => {
-                  return doAjax({
-                    url: `/* @echo C3DATA_MEDIA_URL */('${model.get('name')}.form.json')/$value`,
-                    method: 'PUT',
-                    headers: {
-                      'Content-Type': 'application/json; charset=utf-8',
-                      'X-DA-MEDIA-ENTITYID': `${model.get('name')}.form.json`, // TODO NEED TO TRACK ID
-                      'X-DA-MEDIA-ENTITYSET': true
-                    },
-                    data: JSON.stringify(configs.form)
-                  });
-                },
-                () => {
-                  doAjax({
-                    url: '/* @echo C3DATA_MEDIA_URL */',
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json; charset=utf-8',
-                      'X-DA-MEDIA-ENTITYID': `${model.get('name')}.form.json`, // TODO NEED TO TRACK ID
-                      'X-DA-MEDIA-ENTITYSET': true
-                    },
-                    data: JSON.stringify(configs.form)
-                  });
-                }
-              )
+      // if (prompt('Type "PUBLISH" to publish this app') === 'PUBLISH') {
+      if (
+        !this.model.hasChangedSinceSnapShot() ||
+        confirm('You have unsaved changes, unsaved changes will not be included. Would you like to proceed?')
+      ) {
+        const model = new AppModel({ id: this.model.id });
+        model.fetch().then(() => {
+          const configs = model.toConfigs(this.fieldTypes, this.ruleTypes, this.ruleConditions);
 
-              .then(() => {
-                return doAjax({
-                  url: `/* @echo C3DATA_MEDIA_URL */('${model.get('name')}.table.json')`,
-                  method: 'GET'
-                });
-              })
-              .then(
-                () => {
-                  return doAjax({
-                    url: `/* @echo C3DATA_MEDIA_URL */('${model.get('name')}.table.json')/$value`,
-                    method: 'PUT',
-                    headers: {
-                      'Content-Type': 'application/json; charset=utf-8',
-                      'X-DA-MEDIA-ENTITYID': `${model.get('name')}.table.json`, // TODO NEED TO TRACK ID
-                      'X-DA-MEDIA-ENTITYSET': true
-                    },
-                    data: JSON.stringify(configs.table)
-                  });
-                },
-                () => {
-                  doAjax({
-                    url: '/* @echo C3DATA_MEDIA_URL */',
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json; charset=utf-8',
-                      'X-DA-MEDIA-ENTITYID': `${model.get('name')}.table.json`, // TODO NEED TO TRACK ID
-                      'X-DA-MEDIA-ENTITYSET': true
-                    },
-                    data: JSON.stringify(configs.table)
-                  });
-                }
-              )
-
-              .then(() => {
-                event.target.removeAttribute('disabled');
-                alert('Publish completed');
-              })
-              .catch(error => {
-                /* eslint-disable no-console */
-                if (window.console && console.error) {
-                  console.error('Error', error);
-                }
-                /* eslint-enabled no-console */
-
-                event.target.removeAttribute('disabled');
-                alert('An error has occured.');
+          return Promise.resolve()
+            .then(() => {
+              return doAjax({
+                url: `/* @echo C3DATA_MEDIA_URL */('${model.get('name')}.form.json')`,
+                method: 'GET'
               });
-          });
-        } else {
-          event.target.removeAttribute('disabled');
-        }
+            })
+            .then(
+              () => {
+                return doAjax({
+                  url: `/* @echo C3DATA_MEDIA_URL */('${model.get('name')}.form.json')/$value`,
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'X-DA-MEDIA-ENTITYID': `${model.get('name')}.form.json`, // TODO NEED TO TRACK ID
+                    'X-DA-MEDIA-ENTITYSET': true
+                  },
+                  data: JSON.stringify(configs.form)
+                });
+              },
+              () => {
+                doAjax({
+                  url: '/* @echo C3DATA_MEDIA_URL */',
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'X-DA-MEDIA-ENTITYID': `${model.get('name')}.form.json`, // TODO NEED TO TRACK ID
+                    'X-DA-MEDIA-ENTITYSET': true
+                  },
+                  data: JSON.stringify(configs.form)
+                });
+              }
+            )
+
+            .then(() => {
+              return doAjax({
+                url: `/* @echo C3DATA_MEDIA_URL */('${model.get('name')}.table.json')`,
+                method: 'GET'
+              });
+            })
+            .then(
+              () => {
+                return doAjax({
+                  url: `/* @echo C3DATA_MEDIA_URL */('${model.get('name')}.table.json')/$value`,
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'X-DA-MEDIA-ENTITYID': `${model.get('name')}.table.json`, // TODO NEED TO TRACK ID
+                    'X-DA-MEDIA-ENTITYSET': true
+                  },
+                  data: JSON.stringify(configs.table)
+                });
+              },
+              () => {
+                doAjax({
+                  url: '/* @echo C3DATA_MEDIA_URL */',
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'X-DA-MEDIA-ENTITYID': `${model.get('name')}.table.json`, // TODO NEED TO TRACK ID
+                    'X-DA-MEDIA-ENTITYSET': true
+                  },
+                  data: JSON.stringify(configs.table)
+                });
+              }
+            )
+
+            .then(() => {
+              event.target.removeAttribute('disabled');
+              alert('Publish completed');
+            })
+            .catch(error => {
+              /* eslint-disable no-console */
+              if (window.console && console.error) {
+                console.error('Error', error);
+              }
+              /* eslint-enabled no-console */
+
+              event.target.removeAttribute('disabled');
+              alert('An error has occured.');
+            });
+        });
       } else {
         event.target.removeAttribute('disabled');
       }
+      // } else {
+      //   event.target.removeAttribute('disabled');
+      // }
     },
 
     ['click .btn-unpublish'](event) {
@@ -705,6 +699,13 @@ const AppFormPageView = BaseView.extend({
     }
   },
 
+  initialize(options) {
+    this.fieldTypes = options.fieldTypes;
+    this.ruleTypes = options.ruleTypes;
+    this.ruleConditions = options.ruleConditions;
+    BaseView.prototype.initialize.call(this, options);
+  },
+
   render() {
     this.removeSubViews();
     while (this.el.firstChild) {
@@ -712,41 +713,33 @@ const AppFormPageView = BaseView.extend({
     }
     this.subViews = {};
 
+    const model = this.model;
+
     const renderPromises = [];
 
     const fragment = document.createDocumentFragment();
 
     const publishRow = fragment.appendChild(document.createElement('div'));
     publishRow.classList.add('row');
-
     const publishCol = publishRow.appendChild(document.createElement('div'));
     publishCol.classList.add('col-xs-12');
 
-    this.subViews.publishView = new AppDetailsPublishingView({ model: this.model });
+    this.subViews.publishView = new AppFormPageView_PublishingView({ model });
     renderPromises.push(this.subViews.publishView.appendTo(publishCol).render());
 
     const formRow = fragment.appendChild(document.createElement('div'));
     formRow.classList.add('row');
-
     const formCol = formRow.appendChild(document.createElement('div'));
     formCol.classList.add('col-xs-12');
 
-    this.subViews.formView = new AppFormView({ model: this.model });
+    this.subViews.formView = new AppFormPageView_FormView({ model });
     this.subViews.formView.on('openSection', sectionIndex => {
       this.trigger('openSection', sectionIndex);
     });
     this.subViews.formView.on('openField', (sectionIndex, rowIndex, fieldIndex) => {
       this.trigger('openField', sectionIndex, rowIndex, fieldIndex);
     });
-    renderPromises.push(
-      this.subViews.formView
-        .appendTo(formCol)
-        .render()
-        .then(() => {
-          this.subViews.buttonsView = new AppFormPageButtonsView({ model: this.model });
-          return this.subViews.buttonsView.appendTo(this.subViews.formView.form).render();
-        })
-    );
+    renderPromises.push(this.subViews.formView.appendTo(formCol).render());
 
     this.el.appendChild(fragment);
 

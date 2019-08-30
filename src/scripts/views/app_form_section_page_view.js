@@ -8,8 +8,6 @@ const AppSectionFormView = FormView.extend({
       choices.push({ text: index + 1, value: index });
     }
 
-    choices.push({ text: 'Last', value: '-1' });
-
     return {
       sections: [
         {
@@ -92,7 +90,8 @@ const AppFormSectionPageView = BaseView.extend({
 
     ['click .btn-remove'](event) {
       event.preventDefault();
-      if (prompt('Type "REMOVE" to remove this section') === 'REMOVE') {
+      // if (prompt('Type "REMOVE" to remove this section') === 'REMOVE') {
+      if (confirm('This action will remove this section. Would you like to proceed?')) {
         const sections = this.model.get('sections');
         sections.splice(this.sectionIndex, 1);
         this.trigger('navigateBack');
@@ -143,6 +142,7 @@ const AppFormSectionPageView = BaseView.extend({
 
       const order = +model.get('order');
 
+      // TODO - FIX
       if (order === -1) {
         sections.push(sections[this.sectionIndex]);
         sections.splice(this.sectionIndex, 1);

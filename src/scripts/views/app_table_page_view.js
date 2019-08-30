@@ -1,21 +1,9 @@
 /* global BaseView DatatableView FilteredDatatableView */
 
-const AppDatatableView = FilteredDatatableView.extend({
+const AppTablePageView_DatatableView = FilteredDatatableView.extend({
   datatableDefinition() {
     return {
       columns: [
-        {
-          className: 'buttonsCol excludeFromButtons',
-          data: 'id',
-          // orderable: false,
-          render(data, type, row) {
-            return `<a href="#apps/${data}" class="btn btn-default btn-edit">Open<span class="sr-only"> ${
-              row.name
-            } App Module</span></button>`;
-          },
-          searchable: false,
-          width: 50
-        },
         {
           title: 'Name',
           data: 'name'
@@ -25,8 +13,31 @@ const AppDatatableView = FilteredDatatableView.extend({
           data: 'description'
         },
         {
-          title: 'Entity',
-          data: 'entity'
+          title: 'Actions',
+          className: 'buttonsCol excludeFromButtons',
+          data: 'name',
+          // orderable: false,
+          render(data, type, row) {
+            // return `
+            //   <a href="#configs/${row.id}" class="btn btn-default">Configure</a>
+            //   <a href="#form/${data}" class="btn btn-default">Form</a>
+            //   <a href="#form/${data}" class="btn btn-default">Table</a>
+            // `;
+            return `
+              <a href="#configs/${row.id}" class="btn btn-default">Configure</a>
+              <div class="btn-group btn-group-links">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Links <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                  <li><a href="#form/${data}">Open Form Page</a></li>
+                  <li><a href="#form/${data}">Open Table Page</a></li>
+                </ul>
+              </div>
+            `;
+          },
+          searchable: false,
+          width: 50
         }
       ],
       serverSide: true,
@@ -88,7 +99,7 @@ const AppTablePageView = BaseView.extend({
     topRow.classList.add('row', 'row-buttons');
     topRow.innerHTML = `
       <div class="col-xs-6">
-        <a href="#apps/new" class="btn btn-default btn-new">New Module</a>
+        <a href="#configs/new" class="btn btn-default btn-new">New Module</a>
       </div>
 
       <div class="col-sm-6 text-right">
@@ -108,14 +119,14 @@ const AppTablePageView = BaseView.extend({
       </div>
     `;
 
-    this.subViews.datatableView = new AppDatatableView({ collection: this.collection });
+    this.subViews.datatableView = new AppTablePageView_DatatableView({ collection: this.collection });
     const renderPromise = this.subViews.datatableView.appendTo(fragment).render();
 
     const bottomRow = fragment.appendChild(document.createElement('div'));
     bottomRow.classList.add('row', 'row-buttons');
     bottomRow.innerHTML = `
       <div class="col-xs-6">
-        <a href="#apps/new" class="btn btn-default btn-new">New Module</a>
+        <a href="#configs/new" class="btn btn-default btn-new">New Module</a>
       </div>
 
       <div class="col-sm-6 text-right">

@@ -1,12 +1,11 @@
-/* global BaseModel BaseView FormView */
+/* global _ BaseModel BaseView FormView */
 
 const AppFieldFormView = FormView.extend({
   formDefinition() {
     const fieldTypes = this.model.get('fieldTypes');
 
     const typeChoices = Object.keys(fieldTypes).map(fieldType => ({
-      text: fieldTypes[fieldType].title || fieldType,
-      value: fieldType
+      text: fieldType
     }));
 
     const colspanChoices = this.model.get('colspanChoices');
@@ -26,17 +25,17 @@ const AppFieldFormView = FormView.extend({
                 choices: typeChoices
               },
               {
-                title: 'ID',
-                type: 'text',
-                required: false,
-                bindTo: 'name'
-              },
-              {
                 title: 'Column Span',
                 type: 'dropdown',
                 required: true,
                 bindTo: 'colspan',
                 choices: colspanChoices
+              },
+              {
+                title: 'ID',
+                type: 'text',
+                required: false,
+                bindTo: 'name'
               }
             ]
           }
@@ -45,11 +44,29 @@ const AppFieldFormView = FormView.extend({
     ];
 
     Object.keys(fieldTypes).forEach(fieldType => {
-      fieldTypes[fieldType].sections.forEach(section => {
-        section.className = `panel panel-default panel-options ${fieldType}Options`;
+      const fieldTypeSections = _.result(fieldTypes[fieldType], 'sections');
+
+      fieldTypeSections.forEach(section => {
+        section.className = `panel panel-default panel-options ${fieldType.replace(/[^a-zA-Z0-9_]/g, '_')}_Options`;
       });
 
-      sections.push(...fieldTypes[fieldType].sections);
+      sections.push(...fieldTypeSections);
+    });
+
+    sections.push({
+      title: 'Validators',
+      className: 'panel panel-default panel-options validations-options',
+
+      rows: [
+        {
+          fields: [
+            {
+              type: 'html',
+              html: 'Coming soon.'
+            }
+          ]
+        }
+      ]
     });
 
     sections.push({
@@ -60,7 +77,8 @@ const AppFieldFormView = FormView.extend({
         {
           fields: [
             {
-              title: 'Table Column',
+              className: 'col-sm-4',
+              title: 'Display as Table Column',
               bindTo: 'tableColumn',
               required: true,
               type: 'radio',
@@ -83,11 +101,12 @@ const AppFieldFormView = FormView.extend({
 
           const type = model.get('type');
           if (type) {
-            const show = view.el.querySelectorAll(`.${type}Options`);
+            const show = view.el.querySelectorAll(`.${type.replace(/[^a-zA-Z0-9_]/g, '_')}_Options`);
             for (let index = 0, length = show.length; index < length; index++) {
               show[index].classList.remove('hide');
             }
             view.el.querySelector('.table-options').classList.remove('hide');
+            view.el.querySelector('.validations-options').classList.remove('hide');
           }
         };
 
@@ -121,7 +140,8 @@ const AppFormFieldPageView = BaseView.extend({
 
     ['click .btn-remove'](event) {
       event.preventDefault();
-      if (prompt('Type "REMOVE" to remove this field') === 'REMOVE') {
+      // if (prompt('Type "REMOVE" to remove this field') === 'REMOVE') {
+      if (confirm('This action will remove this field. Would you like to proceed?')) {
         const sections = this.model.get('sections');
         sections[this.sectionIndex].rows[this.rowIndex].fields.splice(this.fieldIndex, 1, null);
         this.trigger('navigateBack');
@@ -149,13 +169,13 @@ const AppFormFieldPageView = BaseView.extend({
 
     const formRow = fragment.appendChild(document.createElement('div'));
     formRow.classList.add('row');
-
     const formCol = formRow.appendChild(document.createElement('div'));
     formCol.classList.add('col-xs-12');
 
     const sections = this.model.get('sections');
 
-    const modelOptions = Object.assign({}, sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex]);
+    const modelOptions = Object.assign({ colspan: '1', required: 'No', disabled: 'No', readonly: 'No', tableColumn: 'No' }, sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex]);
+
     modelOptions.fieldTypes = this.fieldTypes;
 
     const colspanChoices = [];
@@ -179,7 +199,10 @@ const AppFormFieldPageView = BaseView.extend({
       const sections = this.model.get('sections');
 
       const json = model.toJSON();
+
       delete json.colspanChoices;
+      delete json.fieldTypes;
+
 
       let originalColSpan = 1;
       if (sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex]) {
@@ -215,7 +238,7 @@ const AppFormFieldPageView = BaseView.extend({
         const leftCol = buttonsRow.appendChild(document.createElement('div'));
         leftCol.classList.add('col-sm-6');
         leftCol.innerHTML = `
-          <button type="button" class="btn btn-default btn-lg btn-save">Save</button>
+          <button type="button" class="btn btn-primary btn-lg btn-save">Update</button>
           <button type="button" class="btn btn-default btn-lg btn-cancel">Cancel</button>
         `;
 

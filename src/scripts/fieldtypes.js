@@ -1,183 +1,211 @@
 const fieldTypes = {};
 
-fieldTypes.text = {
-  title: 'Text Field',
+fieldTypes['Text Field'] = {
+  sections() {
+    return [
+      {
+        title: 'Text Options',
 
-  sections: [
-    {
-      title: 'Text Type Options',
-
-      rows: [
-        {
-          fields: [
-            {
-              title: 'Title',
-              bindTo: 'title',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Required',
-              bindTo: 'required',
-              type: 'radio',
-              choices: [{ text: 'Yes' }, { text: 'No' }]
-            },
-            {
-              title: 'Disabled',
-              bindTo: 'text_disbled',
-              type: 'radio',
-              choices: [{ text: 'Yes' }, { text: 'No' }]
-            },
-            {
-              title: 'Read Only',
-              bindTo: 'text_readonly',
-              type: 'radio',
-              choices: [{ text: 'Yes' }, { text: 'No' }]
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Info Help',
-              bindTo: 'text_infohelp',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Pre Help Text',
-              bindTo: 'text_prehelptext',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Post Help Text',
-              bindTo: 'text_posthelptext',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Placeholder',
-              bindTo: 'text_placeholder',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Value',
-              bindTo: 'text_value',
-              type: 'text'
-            }
-          ]
-        }
-      ]
-    }
-  ],
+        rows: [
+          {
+            fields: [
+              {
+                className: 'col-sm-8',
+                title: 'Title',
+                bindTo: 'title',
+                type: 'text'
+              },
+              {
+                className: 'col-sm-4',
+                title: 'Bind ID',
+                bindTo: 'bind_id',
+                type: 'text'
+              }
+            ]
+          },
+          {
+            fields: [
+              {
+                title: 'Required',
+                bindTo: 'required',
+                type: 'radio',
+                choices: [{ text: 'Yes' }, { text: 'No' }]
+              },
+              {
+                title: 'Disabled',
+                bindTo: 'disabled',
+                type: 'radio',
+                choices: [{ text: 'Yes' }, { text: 'No' }]
+              },
+              {
+                title: 'Read Only',
+                bindTo: 'readonly',
+                type: 'radio',
+                choices: [{ text: 'Yes' }, { text: 'No' }]
+              }
+            ]
+          },
+          {
+            fields: [
+              {
+                title: 'Info Help',
+                bindTo: 'infohelp',
+                type: 'text'
+              },
+              {
+                title: 'Pre Help Text',
+                bindTo: 'prehelptext',
+                type: 'text'
+              },
+              {
+                title: 'Post Help Text',
+                bindTo: 'posthelptext',
+                type: 'text'
+              }
+            ]
+          },
+          {
+            fields: [
+              {
+                className: 'col-sm-4',
+                title: 'Placeholder',
+                bindTo: 'placeholder',
+                type: 'text'
+              },
+              {
+                className: 'col-sm-4',
+                title: 'Value',
+                bindTo: 'value',
+                type: 'text'
+              }
+            ]
+          }
+        ]
+      }
+    ];
+  },
 
   toConfig(json) {
-    return json;
+    return {
+      id: json.name,
+      type: 'text',
+      title: json.title,
+      className: json.className,
+      bindTo: json.bind_id || json.name,
+      disbled: json.disbled === 'Yes',
+      required: json.required === 'Yes',
+      readOnly: json.readonly === 'Yes',
+      infohelp: json.infohelp,
+      prehelptext: json.prehelptext,
+      posthelptext: json.posthelptext,
+      placeholder: json.placeholder,
+      value: json.value,
+      validators: {}
+    };
   }
 };
 
-fieldTypes.textarea = {
-  title: 'Text Area Field',
+fieldTypes['Textarea Field'] = {
+  sections() {
+    return [
+      {
+        title: 'Textarea Options',
 
-  sections: [
-    {
-      title: 'Text Area Type Options',
+        rows: [
+          {
+            fields: [
+              {
+                className: 'col-sm-8',
+                title: 'Title',
+                bindTo: 'title',
+                type: 'text'
+              },
+              {
+                className: 'col-sm-4',
+                title: 'Bind ID',
+                bindTo: 'bind_id',
+                type: 'text'
+              }
+            ]
+          },
+          {
+            fields: [
+              {
+                title: 'Required',
+                bindTo: 'required',
+                type: 'radio',
+                choices: [{ text: 'Yes' }, { text: 'No' }]
+              },
+              {
+                title: 'Disabled',
+                bindTo: 'disabled',
+                type: 'radio',
+                choices: [{ text: 'Yes' }, { text: 'No' }]
+              },
+              {
+                title: 'Read Only',
+                bindTo: 'readonly',
+                type: 'radio',
+                choices: [{ text: 'Yes' }, { text: 'No' }]
+              }
+            ]
+          },
+          {
+            fields: [
+              {
+                title: 'Info Help',
+                bindTo: 'infohelp',
+                type: 'text'
+              },
+              {
+                title: 'Pre Help Text',
+                bindTo: 'prehelptext',
+                type: 'text'
+              },
+              {
+                title: 'Post Help Text',
+                bindTo: 'posthelptext',
+                type: 'text'
+              }
+            ]
+          },
+          {
+            fields: [
+              {
+                className: 'col-sm-4',
+                title: 'Placeholder',
+                bindTo: 'placeholder',
+                type: 'text'
+              },
+              {
+                className: 'col-sm-4',
+                title: 'Value',
+                bindTo: 'value',
+                type: 'text'
+              }
+            ]
+          }
+        ]
+      }
+    ];
+  },
 
-      rows: [
-        {
-          fields: [
-            {
-              title: 'Title',
-              bindTo: 'title',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Required',
-              bindTo: 'text_required',
-              type: 'radio',
-              choices: [{ text: 'Yes' }, { text: 'No' }]
-            },
-            {
-              title: 'Disabled',
-              bindTo: 'text_disbled',
-              type: 'radio',
-              choices: [{ text: 'Yes' }, { text: 'No' }]
-            },
-            {
-              title: 'Read Only',
-              bindTo: 'text_readonly',
-              type: 'radio',
-              choices: [{ text: 'Yes' }, { text: 'No' }]
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Info Help',
-              bindTo: 'text_infohelp',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Pre Help Text',
-              bindTo: 'text_prehelptext',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Post Help Text',
-              bindTo: 'text_posthelptext',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Placeholder',
-              bindTo: 'text_placeholder',
-              type: 'text'
-            }
-          ]
-        },
-        {
-          fields: [
-            {
-              title: 'Value',
-              bindTo: 'text_value',
-              type: 'text'
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  toConfig(json) {
+    return {
+      id: json.name,
+      type: 'text',
+      title: json.title,
+      className: json.className,
+      bindTo: json.bind_id || json.name,
+      disbled: json.disbled === 'Yes',
+      required: json.required === 'Yes',
+      readOnly: json.readonly === 'Yes',
+      infohelp: json.infohelp,
+      prehelptext: json.prehelptext,
+      posthelptext: json.posthelptext,
+      placeholder: json.placeholder,
+      value: json.value,
+      validators: {}
+    };
+  }
 };
