@@ -4,11 +4,11 @@
 const AppModel = BaseModel.extend({
   defaults() {
     return {
-      name: 'string',
-      description: 'string',
+      name: null,
+      description: null,
 
-      formtitle: 'string',
-      tabletitle: 'string',
+      formtitle: null,
+      tabletitle: null,
 
       sections: [],
 
@@ -51,7 +51,7 @@ const AppModel = BaseModel.extend({
   toConfigs(fieldTypes, ruleTypes, ruleConditions) {
     const returnValue = {
       form: {
-        datatableColumns: []
+        tableColumns: []
       },
       table: {
         columns: []
@@ -123,7 +123,22 @@ const AppModel = BaseModel.extend({
               className: getClassName(+section.cols, 1)
             };
           } else {
+            if (row.fields[index].tableColumn === 'Yes') {
+              returnValue.form.tableColumns.push(row.fields[index].name);
+
+              returnValue.table.columns.push({
+                title: row.fields[index].title || null,
+                data: row.fields[index].name || null
+              });
+            }
+
             row.fields[index].className = getClassName(+section.cols, +row.fields[index].colspan);
+            try {
+              row.fields[index].validators = JSON.parse(row.fields[index].validators);
+            } catch(error) {
+              row.fields[index].validators = null;
+            }
+
             const type = row.fields[index].type;
             if (fieldTypes && fieldTypes[type] && fieldTypes[type].toConfig) {
               row.fields[index] = fieldTypes[type].toConfig(row.fields[index]);

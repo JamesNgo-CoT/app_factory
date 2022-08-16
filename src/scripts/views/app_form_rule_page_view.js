@@ -79,12 +79,16 @@ const AppFormRulePageView_FormView = FormView.extend({
           ],
 
           postRender({ model, view }) {
-            const conditionHandler = () => {
-              model.unset('condition_value_1');
-              document.getElementById('condition_value_1').value = '';
+            const conditionHandler = (unset = true) => {
+              if (unset) {
+                document.getElementById('condition_value_1').value = '';
+                model.unset('condition_value_1');
+              }
               document.getElementById('condition_value_1Element').classList.add('hide');
-              model.unset('condition_value_2');
-              document.getElementById('condition_value_2').value = '';
+              if (unset) {
+                document.getElementById('condition_value_2').value = '';
+                model.unset('condition_value_2');
+              }
               document.getElementById('condition_value_2Element').classList.add('hide');
 
               const condition_type = model.get('condition_type');
@@ -101,7 +105,7 @@ const AppFormRulePageView_FormView = FormView.extend({
               }
             };
             model.on('change:condition_type', conditionHandler);
-            conditionHandler();
+            conditionHandler(false);
           }
         },
         {
@@ -142,9 +146,11 @@ const AppFormRulePageView_FormView = FormView.extend({
           ],
 
           postRender({ model, view }) {
-            const actionHandler = () => {
-              model.unset('action_value');
-              document.getElementById('action_value').value = '';
+            const actionHandler = (unset = true) => {
+              if (unset) {
+                document.getElementById('action_value').value = '';
+                model.unset('action_value');
+              }
               document.getElementById('action_valueElement').classList.add('hide');
 
               const action_type = model.get('action_type');
@@ -157,7 +163,7 @@ const AppFormRulePageView_FormView = FormView.extend({
               }
             };
             model.on('change:action_type', actionHandler);
-            actionHandler();
+            actionHandler(false);
           }
         }
       ]

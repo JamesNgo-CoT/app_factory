@@ -282,7 +282,7 @@ const AppFormPageView_FormView_SectionsView = BaseView.extend({
               fieldTd.setAttribute('colspan', +field.colspan || 1);
               fieldTd.innerHTML = `<button type="button" class="btn btn-default btn-block btn-open-field btn-details" data-section-index="${sectionIndex}" data-row-index="${rowIndex}" data-field-index="${fieldIndex}" draggable="true">${
                 field.title ? '<strong>' + field.title + '</strong>' : 'Untitled'
-              }${field.name ? ' (' + field.name + ')' : ''}${field.required ? ' - required' : ''}<br>${
+              }${field.name ? ' (' + field.name + ')' : ''}${field.required === 'Yes' ? ' - required' : ''}<br>${
                 field.type
               }</button>`;
               length = length - ((+field.colspan || 1) - 1);
@@ -348,7 +348,7 @@ const AppFormPageView_FormView_RulesView = BaseView.extend({
           <td>${rule.condition_field}</td>
           <td>${rule.condition_type}</td>
           <td>${rule.action_type}</td>
-          <td>${rule.action_target.join(', ')}</td>
+          <td>${rule.action_target ? rule.action_target.join(', ') : ''}</td>
           <td><button type="button" class="btn btn-default btn-configure-rule" data-rule-index="${index}">Configure</button></td>
         `;
       });

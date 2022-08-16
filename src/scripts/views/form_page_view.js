@@ -1,12 +1,12 @@
-/* global BaseView FormView */
+/* global BaseView FormView Backbone */
 
 const FormPageView_FormView_ButtonsView = BaseView.extend({
-  initialize(options) {
-    this.listenTo(options.model, `change:${options.model.idAttribute}`, () => {
-      this.render();
-    });
-    BaseView.prototype.initialize.call(this, options);
-  },
+  // initialize(options) {
+  //   this.listenTo(options.model, `change:${options.model.idAttribute}`, () => {
+  //     this.render();
+  //   });
+  //   BaseView.prototype.initialize.call(this, options);
+  // },
 
   render() {
     if (this.model.isNew()) {
@@ -40,17 +40,7 @@ const FormPageView_FormView = FormView.extend({
     ['click .btn-save'](event) {
       event.preventDefault();
       this.form.querySelector('.fv-hidden-submit').click();
-    },
-
-    ['click .btn-delete'](event) {
-      event.preventDefault();
-
-      if (prompt('Type "DELETE" to delete this app') === 'DELETE') {
-        this.model.destroy().then(() => {
-          // Backbone.history.navigate('apps', { trigger: true });
-        });
-      }
-    },
+    }
   },
 
   render() {
@@ -72,6 +62,20 @@ const FormPageView = BaseView.extend({
   className: 'formPageView',
 
   formView: FormPageView_FormView,
+
+  entityset: null,
+
+  events: {
+    ['click .btn-delete'](event) {
+      event.preventDefault();
+
+      if (prompt('Type "DELETE" to delete this app') === 'DELETE') {
+        this.model.destroy().then(() => {
+          Backbone.history.navigate(`form/${this.entityset}/new`, { trigger: true });
+        });
+      }
+    }
+  },
 
   render() {
     this.removeSubViews();
@@ -95,7 +99,7 @@ const FormPageView = BaseView.extend({
     this.subViews.formView.on('success', () => {
       if (this.model.isNew()) {
         this.model.clear();
-        this.subViews.formView.form.reset()
+        this.subViews.formView.form.reset();
       }
     });
 

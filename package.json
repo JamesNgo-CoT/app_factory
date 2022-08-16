@@ -37,6 +37,7 @@
     "run-sequence": "^1.2.2"
   },
   "dependencies": {
+    "ace-builds": "github:ajaxorg/ace-builds",
     "core": "git+https://github.com/CityofToronto/corejs.git#9.3.6",
     "cotui": "git+https://github.com/CityofToronto/COT_UI.git#1.0.2",
     "datatables": "github:CityofToronto/fepe_datatables",

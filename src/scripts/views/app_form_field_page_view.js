@@ -1,4 +1,55 @@
-/* global _ BaseModel BaseView FormView */
+/* global _ BaseModel BaseView FormView ace */
+
+// const AppFieldFormView_ValidatorsView = BaseView.extend({
+//   render() {
+//     while (this.el.firstChild) {
+//       this.el.removeChild(this.el.firstChild);
+//     }
+
+//     const fragment = document.createDocumentFragment();
+
+//     const validators = this.model.get('validators');
+//     if (validators.length > 0) {
+//       // TODO
+//       const table = fragment.appendChild(document.createElement('table'));
+//       table.classList.add('table', 'table-bordered');
+//       table.setAttribute('width', '100%');
+
+//       const thead = table.appendChild(document.createElement('thead'));
+//       thead.innerHTML = `
+//         <tr>
+//           <th>Field</th>
+//           <th>Condition</th>
+//           <th>Action</th>
+//           <th>Targets</th>
+//           <th>&nbsp;</th>
+//         </tr>
+//       `;
+
+//       const tbody = table.appendChild(document.createElement('tbody'));
+
+//       validators.forEach((rule, index) => {
+//         const tr = tbody.appendChild(document.createElement('tr'));
+//         tr.innerHTML = `
+//           <td>${rule.condition_field}</td>
+//           <td>${rule.condition_type}</td>
+//           <td>${rule.action_type}</td>
+//           <td>${rule.action_target.join(', ')}</td>
+//           <td><button type="button" class="btn btn-default btn-configure-rule" data-rule-index="${index}">Configure</button></td>
+//         `;
+//       });
+//     }
+
+//     const addRuleButton = fragment.appendChild(document.createElement('button'));
+//     addRuleButton.setAttribute('type', 'button');
+//     addRuleButton.classList.add('btn', 'btn-default', 'btn-add-rule');
+//     addRuleButton.innerHTML = 'Add Rule';
+
+//     this.el.appendChild(fragment);
+
+//     return BaseView.prototype.render.call(this);
+//   }
+// });
 
 const AppFieldFormView = FormView.extend({
   formDefinition() {
@@ -62,7 +113,19 @@ const AppFieldFormView = FormView.extend({
           fields: [
             {
               type: 'html',
-              html: 'Coming soon.'
+              html: '',
+
+              postRender({ model, view, field }) {
+                const el = document.getElementById(`${field.id}Element`);
+                el.setAttribute('style', 'height: 200px; margin-bottom: 0;');
+                el.innerHTML = model.get('validators');
+                var editor = ace.edit(el);
+                editor.setTheme('ace/theme/monokai');
+                editor.session.setMode('ace/mode/json');
+                editor.on('change', () => {
+                  model.set('validators', editor.getSession().getValue());
+                });
+              }
             }
           ]
         }
@@ -119,6 +182,21 @@ const AppFieldFormView = FormView.extend({
 
   success() {
     this.trigger('success');
+  },
+
+  render() {
+    this.removeSubViews();
+    while (this.el.firstChild) {
+      this.el.removeChild(this.el.firstChild);
+    }
+    this.subViews = {};
+
+    return FormView.prototype.render.call(this);
+    // .then(() => {
+    //   const model = this.model;
+    //   this.subViews.buttonsView = new AppFormPageView_FormView_ButtonsView({ model });
+    //   return this.subViews.buttonsView.appendTo(this.form).render();
+    // });
   }
 });
 
@@ -174,7 +252,10 @@ const AppFormFieldPageView = BaseView.extend({
 
     const sections = this.model.get('sections');
 
-    const modelOptions = Object.assign({ colspan: '1', required: 'No', disabled: 'No', readonly: 'No', tableColumn: 'No' }, sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex]);
+    const modelOptions = Object.assign(
+      { colspan: '1', required: 'No', disabled: 'No', readonly: 'No', tableColumn: 'No', validators: "{}" },
+      sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex]
+    );
 
     modelOptions.fieldTypes = this.fieldTypes;
 
@@ -203,7 +284,6 @@ const AppFormFieldPageView = BaseView.extend({
       delete json.colspanChoices;
       delete json.fieldTypes;
 
-
       let originalColSpan = 1;
       if (sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex]) {
         originalColSpan = +(sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex].colspan || 1);
@@ -211,19 +291,18 @@ const AppFormFieldPageView = BaseView.extend({
 
       sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex] = json;
 
-      const newColspan = +sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex].colspan
+      const newColspan = +sections[this.sectionIndex].rows[this.rowIndex].fields[this.fieldIndex].colspan;
       if (originalColSpan < newColspan) {
         let numberOfFieldsToRemove = newColspan - originalColSpan;
         for (let index = 0; index < numberOfFieldsToRemove; index++) {
           sections[this.sectionIndex].rows[this.rowIndex].fields.splice(this.fieldIndex + 1, 1);
         }
       } else if (originalColSpan > newColspan) {
-        let numberOfFieldsToAdd =  originalColSpan - newColspan;
+        let numberOfFieldsToAdd = originalColSpan - newColspan;
         for (let index = 0; index < numberOfFieldsToAdd; index++) {
           sections[this.sectionIndex].rows[this.rowIndex].fields.splice(this.fieldIndex + 1, 0, null);
         }
       }
-
 
       this.trigger('navigateBack');
     });

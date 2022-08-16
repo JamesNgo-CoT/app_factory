@@ -136,7 +136,7 @@ const AppFormSectionPageView = BaseView.extend({
 
       const sections = this.model.get('sections');
 
-      sections[this.sectionIndex].id = model.get('id') || null;
+      sections[this.sectionIndex].name = model.get('name') || null;
       sections[this.sectionIndex].title = model.get('title') || null;
       sections[this.sectionIndex].cols = model.get('cols');
 

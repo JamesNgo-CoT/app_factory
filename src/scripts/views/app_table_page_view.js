@@ -30,8 +30,8 @@ const AppTablePageView_DatatableView = FilteredDatatableView.extend({
                   Links <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right">
-                  <li><a href="#form/${data}">Open Form Page</a></li>
-                  <li><a href="#form/${data}">Open Table Page</a></li>
+                  <li><a href="#form/${data}/new">Open Form Page</a></li>
+                  <li><a href="#table/${data}">Open Table Page</a></li>
                 </ul>
               </div>
             `;

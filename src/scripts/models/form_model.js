@@ -3,6 +3,7 @@
 /* exported FormModel */
 const FormModel = BaseModel.extend({
   parse(response, options) {
+    this.formDefinition = response.formDefinition;
     const id = response[this.idAttribute];
     response = JSON.parse(response.payload);
     response[this.idAttribute] = id;
@@ -20,8 +21,11 @@ const FormModel = BaseModel.extend({
       newJson[this.idAttribute] = this.id
     }
 
-    const datatableColumns = _.result(this, 'datatableColumns') || [];
-    datatableColumns.forEach(column => {
+    const formDefinition = _.result(this, 'formDefinition');
+    newJson.formDefinition = formDefinition;
+
+    const tableColumns = _.result(formDefinition, 'tableColumns') || [];
+    tableColumns.forEach(column => {
       newJson[column] = json[column];
     });
 

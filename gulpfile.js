@@ -14,9 +14,9 @@ core.embeddedApp.createTasks(gulp, {
       C3DATA_APPS_URL: 'https://config.cc.toronto.ca:49093/c3api_data/v2/DataAccess.svc/app_factory/apps'
     },
     dev: {
-      C3DATA_BASE_URL: 'https://config.cc.toronto.ca:49093/c3api_data/v2/DataAccess.svc/app_factory',
-      C3DATA_MEDIA_URL: 'https://config.cc.toronto.ca:49093/c3api_data/v2/DataAccess.svc/app_factory/Media',
-      C3DATA_APPS_URL: 'https://config.cc.toronto.ca:49093/c3api_data/v2/DataAccess.svc/app_factory/apps'
+      C3DATA_BASE_URL: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/app_factory',
+      C3DATA_MEDIA_URL: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/app_factory/Media',
+      C3DATA_APPS_URL: 'https://was-intra-sit.toronto.ca/c3api_data/v2/DataAccess.svc/app_factory/apps'
     },
     qa: {},
     prod: {}
